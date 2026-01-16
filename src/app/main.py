@@ -37,5 +37,5 @@ def main():
         timeout_keep_alive=30
     )
 
-    if __name__ == "__main__":
-        main()
+if __name__ == "__main__":
+    main()

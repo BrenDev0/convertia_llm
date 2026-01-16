@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from src.features.websocket.interface.fastapi import routes as ws_routes
 
 def create_fastapi_server():  
     app = FastAPI()
@@ -10,6 +11,10 @@ def create_fastapi_server():
         This endpoints verifies server status.
         """
         return {"status": "convertia llm ok"}
+    
+
+    
+    app.include_router(ws_routes.router)
 
     # @app.get("/connections", tags=["Internal"])
     # async def get_websocket_connections():
