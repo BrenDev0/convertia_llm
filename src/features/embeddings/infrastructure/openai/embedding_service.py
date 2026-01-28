@@ -16,14 +16,12 @@ class OpenAIEmbeddingService(embedding_service.EmbeddingService):
         document_chunks: List[DocumentChunk]
     ) -> entities.EmbeddingResult:
         texts = [chunk.content for chunk in document_chunks]
-        batch_size = 64
         embeddings = []
         
-        for i in range(0, len(texts), batch_size):
-            batch = texts[i:i + batch_size]
+        for text in texts:
             response = await self._client.embeddings.create(
                 model=self._model,
-                input=batch
+                input=text
             )
             
             parsed_response = OpenAiEmbeddingResposne.model_validate(response.model_dump()) 
