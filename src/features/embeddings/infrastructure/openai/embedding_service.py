@@ -1,8 +1,8 @@
 import tiktoken
-import uuid
 from typing import List
 from openai import AsyncOpenAI
 from src.features.embeddings.domain import entities, embedding_service
+from src.features.embeddings.infrastructure.openai.schemas import OpenAiEmbeddingResposne
 from src.persistence.domain.entities import DocumentChunk
 
 class OpenAIEmbeddingService(embedding_service.EmbeddingService):
@@ -25,7 +25,10 @@ class OpenAIEmbeddingService(embedding_service.EmbeddingService):
                 model=self._model,
                 input=batch
             )
-            batch_embeddings = [item.embedding for item in response.data]
+            
+            parsed_response = OpenAiEmbeddingResposne.model_validate(response.model_dump()) 
+
+            batch_embeddings = [item.embedding for item in parsed_response.data]
             embeddings.extend(batch_embeddings)
         
         return entities.EmbeddingResult(
@@ -34,9 +37,12 @@ class OpenAIEmbeddingService(embedding_service.EmbeddingService):
         )
     
     async def embed_query(self, query: str) -> List[float]:
-        result = await self._client.embeddings.create(
+        response = await self._client.embeddings.create(
             model=self._model,
             input=query
         )
-        return result.data[0].embedding
+
+        parsed_response = OpenAiEmbeddingResposne.model_validate(response.model_dump()) 
+
+        return parsed_response.data[0].embedding
     
