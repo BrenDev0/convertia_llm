@@ -1,4 +1,3 @@
-import tiktoken
 from typing import List
 from openai import AsyncOpenAI
 from src.features.embeddings.domain import entities, embedding_service
@@ -9,7 +8,6 @@ class OpenAIEmbeddingService(embedding_service.EmbeddingService):
     def __init__(self, api_key: str, model: str = "text-embedding-3-large"):
         self._client = AsyncOpenAI(api_key=api_key)
         self._model = model
-        self._encoding = tiktoken.get_encoding("cl100k_base")
     
     async def embed_document(
         self,
