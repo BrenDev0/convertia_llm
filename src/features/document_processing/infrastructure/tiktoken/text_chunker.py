@@ -1,3 +1,4 @@
+import tiktoken
 from typing import List
 from src.features.document_processing.domain.text_chunker import TextChunker
 from  src.persistence.domain.entities import DocumentChunk
