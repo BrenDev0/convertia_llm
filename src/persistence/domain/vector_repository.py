@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any, Optional
+from uuid import UUID
 from pydantic import BaseModel
 from src.persistence.domain.entities import DocumentChunk
 
@@ -15,8 +16,7 @@ class VectorRepository(ABC):
         self,
         embeddings: List[List[float]],
         chunks: List[DocumentChunk],
-        namespace: str,
-        **kwargs
+        namespace: str
     ):
         raise NotImplementedError
     
@@ -38,10 +38,8 @@ class VectorRepository(ABC):
     
     @abstractmethod
     def delete_namespace(self, namespace: str) -> bool:
-        """Delete entire collection/namespace"""
         raise NotImplementedError
     
     @abstractmethod
-    def delete_user_data(self, user_id: str) -> Dict[str, Any]:
-        """Delete all data for a user across all namespaces"""
+    def delete_embeddings(self, key: str, value: UUID, namespace: str,):
         raise NotImplementedError

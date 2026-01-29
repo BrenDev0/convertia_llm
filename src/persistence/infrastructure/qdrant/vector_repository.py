@@ -1,6 +1,6 @@
+from uuid import UUID
 import qdrant_client
 from qdrant_client import models
-from uuid import uuid4
 from src.persistence.domain.vector_repository import VectorRepository
 
 class QdrantVectorRepository(VectorRepository):
@@ -14,7 +14,7 @@ class QdrantVectorRepository(VectorRepository):
             api_key=api_key
         )
 
-    def store_embeddings(self, embeddings, chunks, namespace, **kwargs):
+    def store_embeddings(self, embeddings, chunks, namespace = "convertia"):
         collection_exists = self._check_namespace_exists(name=namespace)
 
         if not collection_exists:
@@ -25,12 +25,11 @@ class QdrantVectorRepository(VectorRepository):
         for chunk, embedding in zip(chunks, embeddings):
             points.append(
                 models.PointStruct(
-                    id=uuid4(),
+                    id=chunk.chunk_id,
                     vector=embedding,
                     payload={
                         **chunk.metadata,
-                        **kwargs, # Include filename, user_id, agent_id, etc.
-                        "conetent": chunk.content,
+                        "content": chunk.content,
                         
                     }
                 )
@@ -76,6 +75,12 @@ class QdrantVectorRepository(VectorRepository):
             field_schema="keyword"
         )
 
+        self.__client.create_payload_index(
+            collection_name=name,
+            field_name="knowledge_id",
+            field_schema="keyword"
+        )
+
 
 
     def _check_namespace_exists(
@@ -95,16 +100,20 @@ class QdrantVectorRepository(VectorRepository):
         self.__client.delete_collection(collection_name=namespace)
 
     
-    def delete_user_data(self, user_id):
-        user_prefix = f"user_{user_id}_" 
-        collections = self.__client.get_collections()
-
-        for collection in collections.collections:
-            if collection.name.startswith(user_prefix):
-                self.__client.delete_collection(collection.name)
-
-        
-        return 
+    def delete_embeddings(self, key: str, value: UUID, namespace: str = "convertia",):
+        self.__client.delete(
+            collection_name=namespace,
+            points_selector=models.FilterSelector(
+                filter=models.Filter(
+                    must=[
+                        models.FieldCondition(
+                            key=key,
+                            match=models.MatchValue(value=value)
+                        )
+                    ]
+                )
+            )
+        )
 
     
     
