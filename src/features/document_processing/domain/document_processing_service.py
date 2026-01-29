@@ -10,7 +10,3 @@ class DocumentProcessingService(ABC):
     @abstractmethod
     def process_pdf(self, file_bytes: bytes) -> List[DocumentChunk]:
        raise NotImplementedError
-    
-    @abstractmethod
-    def chunk_text(self, text: str, max_tokens: int, token_overlap: int) -> List[DocumentChunk]:
-        raise NotImplementedError
