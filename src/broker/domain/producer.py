@@ -7,6 +7,6 @@ class Producer(ABC):
     def publish(
         self,
         routing_key: str,
-        event_message: Union[BaseModel, Dict[str, Any]]  
+        event: Union[BaseModel, Dict[str, Any]]  
     ):
         raise NotImplementedError
