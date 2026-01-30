@@ -12,11 +12,13 @@ def setup_embedding_queues():
         channel.queue_bind(
                 exchange="documents",
                 queue="documents.embed_chunks.q",
-                routing_key="document.chunked"
+                routing_key="document.text.chunked"
             )
+        
+        logger.info("embedding queues setup")
     
     except Exception as e:
-        logger.error(str(e))
+        logger.error("Error setting up embedding queues")
         raise
 
     finally:

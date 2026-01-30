@@ -1,6 +1,7 @@
 import logging
 from src.broker.dependencies.connection import get_broker_connection
 from src.features.embeddings.setup import consumers as embeddings_consumers, queues as embeddings_queues
+from src.features.document_processing.setup import consumers as document_processing_consumers, queues as document_processesing_queues
 logger = logging.getLogger(__name__)
 
 def __setup_exchanges():
@@ -13,6 +14,8 @@ def __setup_exchanges():
             exchange_type="topic",
             durable=True
         )
+
+        logger.info("Exchanges setup")
     
     except Exception as e:
         logger.error(str(e))
@@ -26,4 +29,7 @@ def setup_broker():
 
 
     embeddings_queues.setup_embedding_queues()
+    document_processesing_queues.setup_document_processing_queues()
+
     embeddings_consumers.setup_embeddings_consumers()
+    document_processing_consumers.setup_document_processing_consumers()

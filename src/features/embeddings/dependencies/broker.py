@@ -28,7 +28,7 @@ def get_embed_chunks_handler() -> EmbedChunksHandler:
 
 def get_embed_chunks_consumer() -> consumer.Consumer:
     try: 
-        instance_key = "embeddings_consumer"
+        instance_key = "embed_chunks_consumer"
         consumer = Container.resolve(instance_key)
 
     except DependencyNotRegistered:
