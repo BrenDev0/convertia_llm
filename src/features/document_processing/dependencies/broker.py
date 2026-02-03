@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 def get_extract_text_handler() -> extract_text.ExtractTextHandler:
     try:
         instance_key = "extract_text_handler"
-        hander = Container.resolve(instance_key)
+        handler = Container.resolve(instance_key)
 
     except DependencyNotRegistered:
         handler = extract_text.ExtractTextHandler(
