@@ -27,7 +27,6 @@ def __setup_exchanges():
 def setup_broker():
     __setup_exchanges()
 
-
     embeddings_queues.setup_embedding_queues()
     document_processesing_queues.setup_document_processing_queues()
 

@@ -14,3 +14,11 @@ class ChunkTextPayload(BaseModel):
     knowledge_id: UUID
     text: str
     
+
+class InternalKnowledgeBaseRequest(BaseModel):
+    user_id: UUID
+    agent_id: UUID
+    connection_id: UUID
+    knowledge_id: UUID
+    file_type: str
+    file_bytes: bytes
