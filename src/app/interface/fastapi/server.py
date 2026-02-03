@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from src.features.websocket.interface.fastapi import routes as ws_routes
+from src.features.document_processing.interface.fastapi import routes as document_router
 
 def create_fastapi_server():  
     app = FastAPI()
@@ -15,6 +16,7 @@ def create_fastapi_server():
 
     
     app.include_router(ws_routes.router)
+    app.include_router(document_router.router)
 
     # @app.get("/connections", tags=["Internal"])
     # async def get_websocket_connections():
