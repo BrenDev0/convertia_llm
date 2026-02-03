@@ -3,7 +3,7 @@ from fastapi import APIRouter, Request, Depends, Body
 from fastapi.responses import JSONResponse
 from uuid import UUID
 from src.app.interface.fastapi.middleware.hmac import verify_hmac
-from src.features.document_processing.domain.schemas import KnowledgeBaseRequest, ExtractTextPayload
+from src.features.document_processing.domain.schemas import DownloadDocumentPayload, ExtractTextPayload
 from src.broker.dependencies.producers import get_documents_producer
 from src.broker.domain import base_event, producer
 
@@ -18,18 +18,17 @@ router = APIRouter(
 
 @router.post("/Knowledge-base", status_code=202)
 def upload(
-    doc: KnowledgeBaseRequest = Body(...),
+    payload: DownloadDocumentPayload = Body(...),
     producer: producer.Producer = Depends(get_documents_producer)
 ):
-    payload = {}
 
     event = base_event.BaseEvent(
-        connection_id=doc.connection_id,
+        connection_id=payload.connection_id,
         payload=payload.model_dump()
     )
 
     producer.publish(
-        routing_key="documents.raw",
+        routing_key="documents.url",
         event=event
     )
 
