@@ -16,7 +16,7 @@ router = APIRouter(
 )
 
 
-@router.post("/Knowledge-base/{agent_id}", status_code=202)
+@router.post("/Knowledge-base", status_code=202)
 def upload(
     agent_id: UUID,
     doc: KnowledgeBaseRequest,
@@ -24,7 +24,7 @@ def upload(
 ):
     payload = ExtractTextPayload(
         user_id=doc.user_id,
-        agent_id=agent_id,
+        agent_id=doc.agent_id,
         knowledge_id=doc.knowledge_id,
         file_type=doc.file_type, 
         file_bytes=doc.file_bytes

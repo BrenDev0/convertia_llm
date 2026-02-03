@@ -17,6 +17,7 @@ class ChunkTextPayload(BaseModel):
 
 class KnowledgeBaseRequest(BaseModel):
     user_id: UUID
+    agent_id: UUID
     connection_id: UUID
     knowledge_id: UUID
     file_type: str
