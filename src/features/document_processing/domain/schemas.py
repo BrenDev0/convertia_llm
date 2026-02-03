@@ -15,10 +15,10 @@ class ChunkTextPayload(BaseModel):
     text: str
     
 
-class InternalKnowledgeBaseRequest(BaseModel):
+class DownloadDocumentPayload(BaseModel):
     user_id: UUID
     agent_id: UUID
     connection_id: UUID
     knowledge_id: UUID
     file_type: str
-    file_bytes: bytes
+    file_url: str

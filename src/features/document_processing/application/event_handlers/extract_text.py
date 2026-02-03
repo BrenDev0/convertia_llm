@@ -27,7 +27,7 @@ class ExtractTextHandler(handlers.Handler):
             text=text
         )
 
-        parsed_event.payload = chunk_payload
+        parsed_event.payload = chunk_payload.model_dump()
 
         self.__producer.publish(
             routing_key="documents.text.extracted",
