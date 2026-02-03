@@ -1,5 +1,5 @@
 import logging
-from fastapi import APIRouter, Request, Depends
+from fastapi import APIRouter, Request, Depends, Body
 from fastapi.responses import JSONResponse
 from uuid import UUID
 from src.app.interface.fastapi.middleware.hmac import verify_hmac
@@ -19,7 +19,7 @@ router = APIRouter(
 @router.post("/Knowledge-base/{agent_id}", status_code=202)
 def upload(
     agent_id: UUID,
-    doc: InternalKnowledgeBaseRequest,
+    doc: InternalKnowledgeBaseRequest = Body(...),
     producer: producer.Producer = Depends(get_documents_producer)
 ):
     payload = ExtractTextPayload(
