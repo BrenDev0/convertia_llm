@@ -30,8 +30,6 @@ class ExtractTextHandler(handlers.AsyncHandler):
             text = file_bytes.decode('utf-8')
 
         chunk_payload = schemas.ChunkTextPayload(
-            user_id=payload.user_id,
-            agent_id=payload.agent_id,
             knowledge_id=payload.knowledge_id,
             text=text
         )

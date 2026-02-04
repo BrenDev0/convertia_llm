@@ -16,8 +16,8 @@ class ChunkTextHandler(handlers.Handler):
         payload = schemas.ChunkTextPayload(**parsed_event.payload)
 
         metadata = {
-            "user_id": payload.user_id,
-            "agent_id": payload.agent_id,
+            "user_id": parsed_event.user_id,
+            "agent_id": parsed_event.agent_id,
             "knowledge_id": payload.knowledge_id
         }
 
@@ -29,6 +29,7 @@ class ChunkTextHandler(handlers.Handler):
         )
 
         embed_chunks_payload = EmbedChunksPayload(
+            knowledge_id=payload.knowledge_id,
             chunks=chunks
         ) 
 

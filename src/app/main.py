@@ -21,6 +21,7 @@ def main():
     logging.getLogger("pika").setLevel(logging.WARNING)
     logging.getLogger("asyncio").setLevel(logging.WARNING)
     logging.getLogger("botocore").setLevel(logging.WARNING)
+    logging.getLogger("openai._base_client").setLevel(logging.WARNING)
 
     logger = logging.getLogger(__name__)
     logger.debug("!!!!! LOGGER LEVEL SET TO DEBUG !!!!!")

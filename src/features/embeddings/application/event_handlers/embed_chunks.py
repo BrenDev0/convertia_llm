@@ -19,7 +19,11 @@ class EmbedChunksHandler(handlers.AsyncHandler):
             document_chunks=payload.chunks
         )
 
-        parsed_event.payload = result.model_dump()
+        embedded_payload = schemas.EmbedChunksPayload(
+            **result,
+            knowledge_id=payload.knowledge_id
+        )
+        parsed_event.payload = embedded_payload.model_dump()
 
         self.__producer.publish(
             routing_key="documents.text.embedded",
