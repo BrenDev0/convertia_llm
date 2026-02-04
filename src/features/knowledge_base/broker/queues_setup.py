@@ -8,6 +8,7 @@ def setup_knowledge_base_queues():
         channel = connection.channel()
 
         channel.queue_declare("documents.store_embeddings.q")
+        channel.queue_declare("documents.update_embedding_status.q")
 
         channel.queue_bind(
             exchange="documents",
@@ -15,6 +16,11 @@ def setup_knowledge_base_queues():
             routing_key="documents.text.embedded"
         )
 
+        channel.queue_bind(
+            exchange="documents",
+            queue="documents.update_embedding_status.q",
+            routing_key="documents.embeddings.stored"
+        )
         logger.info("Knowledge base queues setup")
 
     except Exception as e:
