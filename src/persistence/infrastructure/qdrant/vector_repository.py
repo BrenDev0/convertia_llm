@@ -88,13 +88,11 @@ class QdrantVectorRepository(VectorRepository):
         name: str
     ):
         ## http://api.qdrant.tech/api-reference/collections/collection-exists
-        res = self.__client.collection_exists(
+        return self.__client.collection_exists(
             collection_name=name
         )
 
-        collection_exists = res.result.exists # bool
-
-        return collection_exists
+        
     
     def delete_namespace(self, namespace):
         self.__client.delete_collection(collection_name=namespace)
