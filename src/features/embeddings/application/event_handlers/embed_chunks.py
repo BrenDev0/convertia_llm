@@ -1,5 +1,5 @@
 from src.broker.domain import handlers, base_event, producer
-from src.features.embeddings.domain import embedding_service, schemas, entities
+from src.features.embeddings.domain import embedding_service, schemas
 
 
 class EmbedChunksHandler(handlers.AsyncHandler):
@@ -19,11 +19,12 @@ class EmbedChunksHandler(handlers.AsyncHandler):
             document_chunks=payload.chunks
         )
 
-        embedded_payload = schemas.EmbedChunksPayload(
-            **result,
-            knowledge_id=payload.knowledge_id
-        )
-        parsed_event.payload = embedded_payload.model_dump()
+        store_chunks_payload = {
+            "embeddings": result.embeddings,
+            "chunks": result.chunks,
+            "knowledge_id": payload.knowledge_id
+        }
+        parsed_event.payload = store_chunks_payload
 
         self.__producer.publish(
             routing_key="documents.text.embedded",

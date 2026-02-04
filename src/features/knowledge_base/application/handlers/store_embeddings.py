@@ -1,7 +1,6 @@
 from src.broker.domain import base_event, handlers, producer
 from src.persistence.domain.vector_repository import VectorRepository
-from src.features.embeddings.domain import entities 
-from src.features.knowledge_base.domain.schemas import KnowledgeEmbeddingEStatus
+from src.features.knowledge_base.domain.schemas import UpdateEmbeddingStatusPayload, StoreChunksPayload
 
 class StoreEmbeddingsHandler(handlers.Handler):
     def __init__(
@@ -14,7 +13,7 @@ class StoreEmbeddingsHandler(handlers.Handler):
 
     def handle(self, event):
         parsed_event = base_event.BaseEvent(**event)
-        payload = entities.EmbeddingsPayload(**parsed_event.payload)
+        payload = StoreChunksPayload(**parsed_event.payload)
 
         self.__vector_repository.store_embeddings(
             embeddings=payload.embeddings,
@@ -22,13 +21,16 @@ class StoreEmbeddingsHandler(handlers.Handler):
             namespace="convertia"
         )
 
-        embedding_status_payload = KnowledgeEmbeddingEStatus(
-            user_id=parsed_event.user_id,
-            knowledge_id=payload.knowledge_id
+        embedding_status_payload = UpdateEmbeddingStatusPayload(
+            knowledge_id=payload.knowledge_id,
+            is_embedded=True
         )
 
+        parsed_event.payload = embedding_status_payload.model_dump()
 
         self.__producer.publish(
-            routing_key="documents.embeddings.stored"
+            routing_key="documents.embeddings.stored",
+            event=parsed_event
+
         )
 

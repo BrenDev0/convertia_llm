@@ -1,6 +1,5 @@
 from src.broker.domain import handlers, base_event, producer
 from src.features.document_processing.domain import text_chunker, schemas
-from src.features.embeddings.domain.schemas import EmbedChunksPayload
 
 class ChunkTextHandler(handlers.Handler):
     def __init__(
@@ -28,12 +27,12 @@ class ChunkTextHandler(handlers.Handler):
             token_overlap=200
         )
 
-        embed_chunks_payload = EmbedChunksPayload(
-            knowledge_id=payload.knowledge_id,
-            chunks=chunks
-        ) 
+        embed_chunks_payload = {
+            "knowledge_id": payload.knowledge_id,
+            "chunks": chunks
+        }
 
-        parsed_event.payload = embed_chunks_payload.model_dump()
+        parsed_event.payload = embed_chunks_payload
 
 
 

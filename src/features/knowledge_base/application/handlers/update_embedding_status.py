@@ -1,7 +1,7 @@
 import os
 from src.broker.domain import base_event, handlers
 from src.features.http.domain.async_http_client import AsyncHttpClient
-from src.features.knowledge_base.domain.schemas import KnowledgeEmbeddingEStatus
+from src.features.knowledge_base.domain.schemas import UpdateEmbeddingStatusPayload
 from src.features.http.utils.hmac import generate_hmac_headers
 
 class UpdateEmeddingStatus(handlers.AsyncHandler):
@@ -13,14 +13,14 @@ class UpdateEmeddingStatus(handlers.AsyncHandler):
 
     async def handle(self, event):
         parsed_event = base_event.BaseEvent(**event)
-        payload = KnowledgeEmbeddingEStatus(**parsed_event.payload)
+        payload = UpdateEmbeddingStatusPayload(**parsed_event.payload)
         
         app_host = os.getenv("APP_HOST")
 
         headers = generate_hmac_headers()
 
         req_body = {
-            "user_id": payload.user_id,
+            "user_id": parsed_event.user_id,
             "status": payload.is_embedded,
             "knowledge_id": payload.knowledge_id
         }
