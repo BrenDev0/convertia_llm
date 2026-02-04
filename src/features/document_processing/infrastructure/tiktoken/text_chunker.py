@@ -10,16 +10,16 @@ class TiktokenTextChunker(TextChunker):
         self.encoding = tiktoken.encoding_for_model(model_name)
 
     def chunk(
-        self,
+        self, 
         text: str,
         metadata: Dict[str, Any],
         max_tokens: int = 1000,
-        overlap_tokens: int = 200
+        token_overlap: int = 200
     ) -> List[DocumentChunk]:
-
+        
         tokens = self.encoding.encode(text)
 
-        step = max_tokens - overlap_tokens
+        step = max_tokens - token_overlap
 
         chunks: List[DocumentChunk] = []
 
