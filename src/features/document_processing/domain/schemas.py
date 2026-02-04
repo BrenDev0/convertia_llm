@@ -6,7 +6,7 @@ class ExtractTextPayload(BaseModel):
     agent_id: UUID
     knowledge_id: UUID
     file_type: str
-    file_bytes: bytes
+    file_url: str
 
 class ChunkTextPayload(BaseModel):
     user_id: UUID

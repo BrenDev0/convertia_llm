@@ -28,7 +28,7 @@ def upload(
     doc_producer: producer.Producer = Container.resolve("documents_producer")
 
     doc_producer.publish(
-        routing_key="documents.url",
+        routing_key="documents.incomming",
         event=event
     )
 

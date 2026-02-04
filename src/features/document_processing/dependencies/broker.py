@@ -1,7 +1,7 @@
 import logging
 from src.di.container import Container
 from src.broker.infrastructure.rabbitmq.consumer import RabbitMqConsumer
-from src.features.document_processing.application.event_handlers import chunk_text, extract_text, download_document
+from src.features.document_processing.application.event_handlers import chunk_text, extract_text
 
 
 
@@ -12,7 +12,8 @@ def __register_handlers():
         key="extract_text_handler",
         factory=lambda: extract_text.ExtractTextHandler(
             pdf_processor=Container.resolve("pdf_processor"),
-            producer=Container.resolve("documents_producer")
+            producer=Container.resolve("documents_producer"),
+            async_http_client=Container.resolve("async_http_client"),
         )
     )
 
@@ -24,14 +25,7 @@ def __register_handlers():
         )
     )
 
-    Container.register_factory(
-        key="download_document_handler",
-        factory=lambda: download_document.DownloadDocument(
-            async_http_client=Container.resolve("async_http_client"),
-            producer=Container.resolve("documents_producer")
-        )
-    )
-
+  
 
 def __register_consumers():
     Container.register_factory(
@@ -47,14 +41,6 @@ def __register_consumers():
         factory=lambda: RabbitMqConsumer(
             queue_name="documents.chunk_text.q",
             handler=Container.resolve("chunk_text_handler")
-        )
-    )
-
-    Container.register_factory(
-        key="download_document_consumer",
-        factory=lambda: RabbitMqConsumer(
-            queue_name="documents.download.q",
-            handler=Container.resolve("download_document_handler")
         )
     )
 

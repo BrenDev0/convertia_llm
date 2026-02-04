@@ -9,20 +9,14 @@ def setup_document_processing_queues():
         connection = create_connection()
         channel = connection.channel()
 
-        channel.queue_declare("documents.download.q")
         channel.queue_declare("documents.extract_text.q")
         channel.queue_declare("documents.chunk_text.q")
 
-        channel.queue_bind(
-            exchange="documents",
-            queue="documents.download.q",
-            routing_key="documents.url"
-        )
-
+    
         channel.queue_bind(
             exchange="documents",
             queue="documents.extract_text.q",
-            routing_key="documents.raw"
+            routing_key="documents.incomming"
         )
 
         channel.queue_bind(
