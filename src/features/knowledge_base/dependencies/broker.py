@@ -38,5 +38,5 @@ def __register_consumers():
 
 
 def register_broker_dependencies():
-    __register_handlers
-    __register_consumers
+    __register_handlers()
+    __register_consumers()
