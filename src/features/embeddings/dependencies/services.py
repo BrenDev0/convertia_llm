@@ -7,19 +7,12 @@ from src.features.embeddings.infrastructure.openai.embedding_service import Open
 
 logger = logging.getLogger(__name__)
 
-def get_embedding_service() -> EmbeddingService:
-    try:
-        instance_key = "embedding_service",
-        service = Container.resolve(instance_key)
-
-    except DependencyNotRegistered:
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            raise ValueError("Openai variables not set")
-        
-        service = OpenAIEmbeddingService(api_key=api_key) 
-        
-        Container.register(instance_key, service)
-        logger.debug(f"{instance_key} registered")
-
-    return service
+def register_services_dependencies():
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise ValueError("Openai variables not set")
+    
+    Container.register_factory(
+        key="embedding_service",
+        factory=lambda: OpenAIEmbeddingService(api_key=api_key) 
+    )

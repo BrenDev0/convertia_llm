@@ -5,6 +5,7 @@ import os
 import uvicorn
 from src.app.interface.fastapi.server import create_fastapi_server
 from src.broker.setup import setup_broker
+from src.di.setup import setup_dependencies
 
 
 def main():
@@ -26,6 +27,7 @@ def main():
 
 
     app = create_fastapi_server()
+    setup_dependencies()
     setup_broker()
     
     port = os.getenv("PORT", 8000)

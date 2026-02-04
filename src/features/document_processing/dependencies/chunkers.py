@@ -6,14 +6,8 @@ from src.features.document_processing.infrastructure.tiktoken.text_chunker impor
 
 logger = logging.getLogger(__name__)
 
-def get_text_chunker() -> TextChunker:
-    try:
-        instance_key = "text_chunker"
-        processor = Container.resolve(instance_key)
-
-    except DependencyNotRegistered:
-        processor = TiktokenTextChunker()
-        Container.register(instance_key, processor)
-        logger.debug(f"{instance_key} registered")
-
-    return processor 
+def register_chunker_dependencies():
+    Container.register_factory(
+        key="text_chunker",
+        factory=lambda: TiktokenTextChunker()
+    )
