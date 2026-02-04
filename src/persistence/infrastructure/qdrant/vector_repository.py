@@ -55,7 +55,7 @@ class QdrantVectorRepository(VectorRepository):
     ):
         ## https://api.qdrant.tech/api-reference/collections/create-collection
         self.__client.create_collection(
-            collection_name={name},
+            collection_name=name,
             vectors_config=models.VectorParams(
                 size=size,
                 distance=models.Distance.COSINE
