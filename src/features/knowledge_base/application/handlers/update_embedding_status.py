@@ -20,9 +20,9 @@ class UpdateEmeddingStatus(handlers.AsyncHandler):
         headers = generate_hmac_headers()
 
         req_body = {
-            "user_id": parsed_event.user_id,
+            "user_id": str(parsed_event.user_id),
             "status": payload.is_embedded,
-            "knowledge_id": payload.knowledge_id
+            "knowledge_id": str(payload.knowledge_id)
         }
 
         await self.__async_http_client.post_request(
