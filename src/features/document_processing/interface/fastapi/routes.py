@@ -1,10 +1,9 @@
 import logging
-from fastapi import APIRouter, Request, Depends, Body
+from fastapi import APIRouter, Depends, Body
 from fastapi.responses import JSONResponse
-from uuid import UUID
+from src.di.container import Container
 from src.app.interface.fastapi.middleware.hmac import verify_hmac
-from src.features.document_processing.domain.schemas import DownloadDocumentPayload, ExtractTextPayload
-from src.broker.dependencies.producers import get_documents_producer
+from src.features.document_processing.domain.schemas import DownloadDocumentPayload
 from src.broker.domain import base_event, producer
 
 logger = logging.getLogger(__name__)
@@ -18,8 +17,7 @@ router = APIRouter(
 
 @router.post("/Knowledge-base", status_code=202)
 def upload(
-    payload: DownloadDocumentPayload = Body(...),
-    producer: producer.Producer = Depends(get_documents_producer)
+    payload: DownloadDocumentPayload = Body(...)
 ):
 
     event = base_event.BaseEvent(
@@ -27,7 +25,9 @@ def upload(
         payload=payload.model_dump()
     )
 
-    producer.publish(
+    doc_producer: producer.Producer = Container.resolve("documents_producer")
+
+    doc_producer.publish(
         routing_key="documents.url",
         event=event
     )
