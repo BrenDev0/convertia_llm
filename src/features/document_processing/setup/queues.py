@@ -36,3 +36,6 @@ def setup_document_processing_queues():
     except Exception:
         logger.error("Error setting up document processing queues")
         raise
+    
+    finally:
+        channel.close()

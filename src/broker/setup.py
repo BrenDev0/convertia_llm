@@ -10,7 +10,7 @@ def __setup_exchanges():
         channel = connection.get_channel()
 
         channel.exchange_declare(
-            exchange="documnets",
+            exchange="documents",
             exchange_type="topic",
             durable=True
         )
