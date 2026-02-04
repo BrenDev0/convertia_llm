@@ -1,13 +1,13 @@
 import logging
-from src.broker.dependencies.connection import get_broker_connection
+from src.broker.infrastructure.rabbitmq.connection import create_connection
 logger = logging.getLogger(__name__)
 
 
 def setup_document_processing_queues():
     try:
 
-        connection = get_broker_connection()
-        channel = connection.get_channel()
+        connection = create_connection()
+        channel = connection.channel()
 
         channel.queue_declare("documents.download.q")
         channel.queue_declare("documents.extract_text.q")
@@ -39,3 +39,4 @@ def setup_document_processing_queues():
     
     finally:
         channel.close()
+        connection.close()

@@ -4,7 +4,7 @@ from typing import Dict, Any, Union
 import pika
 import logging
 
-from src.broker.infrastructure.rabbitmq.connection import RabbitMqConnection
+from src.broker.infrastructure.rabbitmq.connection import create_connection
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ class RabbitMqProducer:
         routing_key: str,
         event: Union[BaseModel, Dict[str, Any], str],
     ): 
-        channel = RabbitMqConnection.get_channel()
+        channel = create_connection().channel()
 
         if isinstance(event, BaseModel):
             body = event.model_dump_json()

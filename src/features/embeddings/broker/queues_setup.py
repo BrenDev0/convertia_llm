@@ -1,11 +1,11 @@
 import logging
-from src.broker.dependencies.connection import get_broker_connection
+from src.broker.infrastructure.rabbitmq.connection import create_connection
 logger = logging.getLogger(__name__)
 
 def setup_embedding_queues():
     try:
-        connection = get_broker_connection()
-        channel = connection.get_channel()
+        connection = create_connection()
+        channel = connection.channel()
 
         channel.queue_declare("documents.embed_chunks.q")
 
@@ -23,4 +23,5 @@ def setup_embedding_queues():
 
     finally:
         channel.close()
+        connection.close()
 
