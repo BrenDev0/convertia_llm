@@ -18,7 +18,7 @@ class QdrantVectorRepository(VectorRepository):
         collection_exists = self._check_namespace_exists(name=namespace)
 
         if not collection_exists:
-            self.create_namespace(name=namespace, size= len(embedding[0]))
+            self.create_namespace(name=namespace, size= len(embeddings[0]))
 
         points = []
 
