@@ -1,12 +1,12 @@
 import logging
 import threading
-from src.features.embeddings.dependencies.broker import get_embed_chunks_consumer
+from src.di.container import Container
 
 logger = logging.getLogger(__name__)
 
 def setup_embeddings_consumers():
     try:
-        embed_chunks_consumer = get_embed_chunks_consumer()
+        embed_chunks_consumer = Container.resolve("embed_chunks_consumer")
         thread = threading.Thread(target=embed_chunks_consumer.start, daemon=True)
         thread.start()
 

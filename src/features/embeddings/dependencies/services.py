@@ -1,8 +1,6 @@
 import logging
 import os
 from src.di.container import Container
-from src.di.domain.exceptions import DependencyNotRegistered
-from src.features.embeddings.domain.embedding_service import EmbeddingService
 from src.features.embeddings.infrastructure.openai.embedding_service import OpenAIEmbeddingService
 
 logger = logging.getLogger(__name__)

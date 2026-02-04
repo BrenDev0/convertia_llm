@@ -1,7 +1,7 @@
 import logging
 from src.broker.dependencies.connection import get_broker_connection
-from src.features.embeddings.setup import consumers as embeddings_consumers, queues as embeddings_queues
-from src.features.document_processing.setup import consumers as document_processing_consumers, queues as document_processesing_queues
+from src.features.embeddings.broker import consumers_setup as embeddings_consumers, queues_setup as embeddings_queues
+from src.features.document_processing.broker import consumers_setup as document_processing_consumers, queues_setup as document_processesing_queues
 logger = logging.getLogger(__name__)
 
 def __setup_exchanges():
