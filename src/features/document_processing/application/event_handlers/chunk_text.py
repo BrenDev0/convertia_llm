@@ -32,7 +32,7 @@ class ChunkTextHandler(handlers.Handler):
             chunks=chunks
         ) 
 
-        parsed_event.payload = embed_chunks_payload
+        parsed_event.payload = embed_chunks_payload.model_dump()
 
 
 

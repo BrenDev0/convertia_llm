@@ -15,11 +15,11 @@ class EmbedChunksHandler(handlers.AsyncHandler):
         parsed_event = base_event.BaseEvent(**event)
         payload = schemas.EmbedChunksPayload(**parsed_event.payload)
 
-        result: entities.EmbeddingResult = await self.__embedding_service.embed_document(
+        result = await self.__embedding_service.embed_document(
             document_chunks=payload.chunks
         )
 
-        parsed_event.payload = result
+        parsed_event.payload = result.model_dump()
 
         self.__producer.publish(
             routing_key="documents.text.embedded",
