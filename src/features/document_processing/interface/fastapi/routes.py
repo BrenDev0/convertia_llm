@@ -15,7 +15,7 @@ router = APIRouter(
 )
 
 
-@router.post("/Knowledge-base", status_code=202)
+@router.post("/knowledge-base", status_code=202)
 def upload(
     payload: DownloadDocumentPayload = Body(...)
 ): 
