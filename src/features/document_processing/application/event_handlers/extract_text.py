@@ -17,8 +17,9 @@ class ExtractTextHandler(handlers.AsyncHandler):
         parsed_event = base_event.BaseEvent(**event)
         payload = schemas.ExtractTextPayload(**parsed_event.payload)
 
-        response = await self.__async_http_client.get_request(
-            endpoint=payload.file_url
+        response = await self.__async_http_client.request(
+            endpoint=payload.file_url,
+            method="GET"
         )
 
         file_bytes = response.content
