@@ -4,18 +4,13 @@ from typing import Dict, Any, Optional
 class AsyncHttpClient(ABC):
 
     @abstractmethod
-    async def post_request(
+    async def request(
         self,
         endpoint: str,
-        req_body: Dict[str, Any],
+        method: str, 
+        req_body: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
     ):
         raise NotImplementedError
     
-    @abstractmethod
-    async def get_request(
-        self,
-        endpoint: str,
-        headers: Optional[Dict[str, str]] = None
-    ): 
-        raise NotImplementedError
+   

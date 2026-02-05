@@ -1,6 +1,6 @@
 import logging
 from src.di.container import Container
-from src.features.http.infrastructure.httpx.async_http_client import HttpxAsyncHttpClient
+from src.http.infrastructure.httpx.async_http_client import HttpxAsyncHttpClient
 
 logger = logging.getLogger(__name__)
 

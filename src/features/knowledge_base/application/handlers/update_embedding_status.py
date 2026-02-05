@@ -1,8 +1,9 @@
 import os
 from src.broker.domain import base_event, handlers
-from src.features.http.domain.async_http_client import AsyncHttpClient
+from src.http.domain.async_http_client import AsyncHttpClient
+from src.http.utils.hmac import generate_hmac_headers
 from src.features.knowledge_base.domain.schemas import UpdateEmbeddingStatusPayload
-from src.features.http.utils.hmac import generate_hmac_headers
+
 
 class UpdateEmeddingStatus(handlers.AsyncHandler):
     def __init__(
@@ -25,8 +26,9 @@ class UpdateEmeddingStatus(handlers.AsyncHandler):
             "knowledge_id": str(payload.knowledge_id)
         }
 
-        await self.__async_http_client.post_request(
+        await self.__async_http_client.request(
             endpoint=f"{app_host}/knowledge-base/embedding-status/{payload.knowledge_id}",
+            method="PATCH",
             headers=headers,
             req_body=req_body
         )

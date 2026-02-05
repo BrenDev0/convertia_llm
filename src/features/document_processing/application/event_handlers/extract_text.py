@@ -1,6 +1,6 @@
 from src.broker.domain import handlers, base_event, producer
 from src.features.document_processing.domain import pdf_processor, schemas
-from src.features.http.domain.async_http_client import AsyncHttpClient
+from src.http.domain.async_http_client import AsyncHttpClient
 
 class ExtractTextHandler(handlers.AsyncHandler):
     def __init__(
