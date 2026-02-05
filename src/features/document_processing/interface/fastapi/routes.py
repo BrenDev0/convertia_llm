@@ -26,7 +26,7 @@ def upload(
         "session": {
             "stage": "Descargando documento...",
             "status": "Descargando",
-            "progress": 50
+            "progress": 30
         }
     }
 

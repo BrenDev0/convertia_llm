@@ -18,9 +18,9 @@ class EmbedChunksHandler(handlers.AsyncHandler):
         embedding_session_payload = {
             "knowledge_id": str(payload.knowledge_id),
             "session": {
-                "stage": "Embedding documento",
+                "stage": "Embedding documento...",
                 "status": "Embedding",
-                "progress": 0
+                "progress": 60
             }
         }
 
@@ -35,7 +35,14 @@ class EmbedChunksHandler(handlers.AsyncHandler):
         embeddings = []
 
         for index, chunk in enumerate(payload.chunks, start=1):
-            progress = int((index / total_chunks) * 100)
+            result = await self.__embedding_service.embed_query(
+                query=chunk.content
+            )
+
+            embeddings.append(result)
+
+            chunk_progress = (index / total_chunks) 
+            progress = int(60 + (chunk_progress * 20))  # 60 to 80
             
             embedding_session_payload = {
                 "knowledge_id": str(payload.knowledge_id),
@@ -45,12 +52,6 @@ class EmbedChunksHandler(handlers.AsyncHandler):
                     "progress": progress
                 }
             }
-
-            result = await self.__embedding_service.embed_query(
-                query=chunk.content
-            )
-
-            embeddings.append(result)
 
             parsed_event.payload = embedding_session_payload
 

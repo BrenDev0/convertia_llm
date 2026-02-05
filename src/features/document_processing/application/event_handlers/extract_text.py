@@ -27,7 +27,7 @@ class ExtractTextHandler(handlers.AsyncHandler):
             "session": {
                 "stage": "Descargando documento...",
                 "status": "Descargado",
-                "progress": 100
+                "progress": 40
             }
         }
 
@@ -40,6 +40,22 @@ class ExtractTextHandler(handlers.AsyncHandler):
 
         file_bytes = response.content
 
+
+        embedding_session_payload = {
+            "knowledge_id": str(payload.knowledge_id),
+            "session": {
+                "stage": "Procesando documento...",
+                "status": "processando",
+                "progress": 50
+            }
+        }
+
+        parsed_event.payload = embedding_session_payload
+
+        self.__producer.publish(
+            routing_key="documents.sessions.embeddings_update",
+            event=parsed_event
+        )
         if payload.file_type == "application/pdf":
             text = self.__pdf_processor.process(file_bytes)
         

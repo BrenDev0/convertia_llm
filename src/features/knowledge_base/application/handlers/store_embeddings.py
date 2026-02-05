@@ -16,7 +16,9 @@ class StoreEmbeddingsHandler(handlers.Handler):
         payload = StoreChunksPayload(**parsed_event.payload)
 
         def progress_callback(current, total):
-            progress = int((current / total) * 100)
+            storage_progress = (current / total) 
+            progress = int(80 + (storage_progress * 20)) # 80 to 100
+            
             progress_payload = {
                 "knowledge_id": str(payload.knowledge_id),
                 "session": {
