@@ -2,6 +2,7 @@ import os
 import logging
 from src.di.container import Container
 from src.persistence.infrastructure.qdrant.vector_repository import QdrantVectorRepository
+from src.persistence.infrastructure.redis.session_repository import RedisSessionRepository
 
 logger = logging.getLogger(__name__)
 
@@ -18,4 +19,9 @@ def register_repositories():
             connection_url=connection_url,
             api_key=api_key
         )
+    )
+
+    Container.register_factory(
+        key="session_repository",
+        factory=lambda: RedisSessionRepository()
     )
