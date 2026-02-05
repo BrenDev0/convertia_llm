@@ -1,17 +1,20 @@
 from src.broker.domain import handlers, base_event, producer
 from src.features.document_processing.domain import pdf_processor, schemas
 from src.http.domain.async_http_client import AsyncHttpClient
+from src.persistence.domain.session_repository import SessionRepository
 
 class ExtractTextHandler(handlers.AsyncHandler):
     def __init__(
         self,
         pdf_processor: pdf_processor.PdfProcessor,
         producer: producer.Producer,
-        async_http_client: AsyncHttpClient
+        async_http_client: AsyncHttpClient,
+        session_repository: SessionRepository
     ):
         self.__pdf_processor = pdf_processor
         self.__producer = producer
         self.__async_http_client = async_http_client
+        self.__session_repository = session_repository
 
     async def handle(self, event):
         parsed_event = base_event.BaseEvent(**event)
