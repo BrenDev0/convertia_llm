@@ -2,6 +2,7 @@ from uuid import UUID
 import qdrant_client
 from qdrant_client import models
 from src.persistence.domain.vector_repository import VectorRepository
+from typing import Callable, Optional
 
 class QdrantVectorRepository(VectorRepository):
     def __init__(
@@ -14,7 +15,13 @@ class QdrantVectorRepository(VectorRepository):
             api_key=api_key
         )
 
-    def store_embeddings(self, embeddings, chunks, namespace = "convertia"):
+    def store_embeddings(
+        self, 
+        embeddings, 
+        chunks, 
+        namespace = "convertia",
+        progress_callback: Optional[Callable[[int, int], None]] = None
+    ):
         collection_exists = self._check_namespace_exists(name=namespace)
 
         if not collection_exists:
@@ -37,6 +44,7 @@ class QdrantVectorRepository(VectorRepository):
 
         
         batch_size = 64
+        total_batches = len(points)
         for i in range(0, len(points), batch_size):
             batch = points[i:i + batch_size]
             ## https://api.qdrant.tech/api-reference/points/upsert-points
@@ -44,6 +52,9 @@ class QdrantVectorRepository(VectorRepository):
                 collection_name=namespace,
                 points=batch
             )
+
+            if progress_callback:
+                progress_callback(min(i + batch_size, total_batches), total_batches)
         
 
         return 

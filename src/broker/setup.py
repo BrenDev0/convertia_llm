@@ -3,6 +3,7 @@ from src.broker.infrastructure.rabbitmq.connection import create_connection
 from src.features.embeddings.broker import consumers_setup as embeddings_consumers, queues_setup as embeddings_queues
 from src.features.document_processing.broker import consumers_setup as document_processing_consumers, queues_setup as document_processesing_queues
 from src.features.knowledge_base.broker import consumers_setup as knowledge_base_consumers, queues_setup as knowledge_base_queues
+from src.features.sessions.broker import consumers_setup as sessions_consumers, queue_setup as sessions_queues
 logger = logging.getLogger(__name__)
 
 def __setup_exchanges():
@@ -32,8 +33,10 @@ def setup_broker():
     embeddings_queues.setup_embedding_queues()
     document_processesing_queues.setup_document_processing_queues()
     knowledge_base_queues.setup_knowledge_base_queues()
+    sessions_consumers.setup_sessions_consumers()
 
     embeddings_consumers.setup_embeddings_consumers()
     document_processing_consumers.setup_document_processing_consumers()
     knowledge_base_consumers.setup_knowledge_base_consumers()
+    sessions_queues.setup_sessions_queues()
 

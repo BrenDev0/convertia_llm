@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any, Optional
+from typing import List, Optional, Callable
 from uuid import UUID
 from pydantic import BaseModel
 from src.persistence.domain.entities import DocumentChunk
@@ -16,7 +16,8 @@ class VectorRepository(ABC):
         self,
         embeddings: List[List[float]],
         chunks: List[DocumentChunk],
-        namespace: str
+        namespace: str,
+        progress_callback: Optional[Callable[[int, int], None]] = None
     ):
         raise NotImplementedError
     

@@ -15,10 +15,30 @@ class StoreEmbeddingsHandler(handlers.Handler):
         parsed_event = base_event.BaseEvent(**event)
         payload = StoreChunksPayload(**parsed_event.payload)
 
+        def progress_callback(current, total):
+            progress = int((current / total) * 100)
+            progress_payload = {
+                "knowledge_id": str(payload.knowledge_id),
+                "session": {
+                    "stage": "Almacenando embeddings",
+                    "status": "Storing",
+                    "progress": progress
+                }
+            }
+        
+            
+            parsed_event.payload = progress_payload
+            
+            self.__producer.publish(
+                routing_key="documents.sessions.embeddings_update",
+                event=parsed_event
+            )
+
         self.__vector_repository.store_embeddings(
             embeddings=payload.embeddings,
             chunks=payload.chunks,
-            namespace="convertia"
+            namespace="convertia",
+            progress_callback=progress_callback
         )
 
         embedding_status_payload = UpdateEmbeddingStatusPayload(

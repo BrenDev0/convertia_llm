@@ -15,14 +15,54 @@ class EmbedChunksHandler(handlers.AsyncHandler):
         parsed_event = base_event.BaseEvent(**event)
         payload = schemas.EmbedChunksPayload(**parsed_event.payload)
 
-        result = await self.__embedding_service.embed_document(
-            document_chunks=payload.chunks
+        embedding_session_payload = {
+            "knowledge_id": str(payload.knowledge_id),
+            "session": {
+                "stage": "Embedding documento",
+                "status": "Embedding",
+                "progress": 0
+            }
+        }
+
+        parsed_event.payload = embedding_session_payload
+
+        self.__producer.publish(
+            routing_key="documents.sessions.embeddings_update",
+            event=parsed_event
         )
 
+        total_chunks = len(payload.chunks)
+        embeddings = []
+
+        for index, chunk in enumerate(payload.chunks, start=1):
+            progress = int((index / total_chunks) * 100)
+            
+            embedding_session_payload = {
+                "knowledge_id": str(payload.knowledge_id),
+                "session": {
+                    "stage": "Embedding documento",
+                    "status": "Embedding",
+                    "progress": progress
+                }
+            }
+
+            result = await self.__embedding_service.embed_query(
+                query=chunk.content
+            )
+
+            embeddings.append(result)
+
+            parsed_event.payload = embedding_session_payload
+
+            self.__producer.publish(
+                routing_key="documents.sessions.embeddings_update",
+                event=parsed_event
+            )
+
         store_chunks_payload = {
-            "embeddings": result.embeddings,
-            "chunks": result.chunks,
-            "knowledge_id": payload.knowledge_id
+            "embeddings": embeddings,
+            "chunks": payload.chunks,
+            "knowledge_id": str(payload.knowledge_id)
         }
         parsed_event.payload = store_chunks_payload
 
