@@ -1,7 +1,8 @@
+import logging
 from src.broker.domain import handlers, base_event, producer
 from src.features.embeddings.domain import embedding_service, schemas
 
-
+logger = logging.getLogger(__name__)
 class EmbedChunksHandler(handlers.AsyncHandler):
     def __init__(
         self,
@@ -24,11 +25,12 @@ class EmbedChunksHandler(handlers.AsyncHandler):
             }
         }
 
-        parsed_event.payload = embedding_session_payload
+        embedding_status_copy = parsed_event.model_copy()
+        embedding_status_copy.payload = embedding_session_payload
 
         self.__producer.publish(
             routing_key="documents.sessions.embeddings_update",
-            event=parsed_event
+            event=embedding_status_copy
         )
 
         total_chunks = len(payload.chunks)
@@ -47,17 +49,19 @@ class EmbedChunksHandler(handlers.AsyncHandler):
             embedding_session_payload = {
                 "knowledge_id": str(payload.knowledge_id),
                 "session": {
-                    "stage": "Embedding documento",
+                    "stage": "Embedding documento...",
                     "status": "Embedding",
                     "progress": progress
                 }
             }
 
-            parsed_event.payload = embedding_session_payload
+            loop_copy = parsed_event.model_copy()
+
+            loop_copy.payload = embedding_session_payload
 
             self.__producer.publish(
                 routing_key="documents.sessions.embeddings_update",
-                event=parsed_event
+                event=loop_copy
             )
 
         store_chunks_payload = {
@@ -65,8 +69,9 @@ class EmbedChunksHandler(handlers.AsyncHandler):
             "chunks": payload.chunks,
             "knowledge_id": str(payload.knowledge_id)
         }
-        parsed_event.payload = store_chunks_payload
 
+        parsed_event.payload = store_chunks_payload
+        
         self.__producer.publish(
             routing_key="documents.text.embedded",
             event=parsed_event

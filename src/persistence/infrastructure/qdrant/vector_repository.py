@@ -12,7 +12,9 @@ class QdrantVectorRepository(VectorRepository):
     ):
         self.__client = qdrant_client.QdrantClient(
             url=connection_url,
-            api_key=api_key
+            api_key=api_key,
+            timeout=600,
+            check_compatibility=False  
         )
 
     def store_embeddings(

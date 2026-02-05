@@ -1,6 +1,9 @@
+import logging
 from src.broker.domain import base_event, handlers, producer
 from src.persistence.domain.vector_repository import VectorRepository
 from src.features.knowledge_base.domain.schemas import UpdateEmbeddingStatusPayload, StoreChunksPayload
+
+logger = logging.getLogger(__name__)
 
 class StoreEmbeddingsHandler(handlers.Handler):
     def __init__(
@@ -15,6 +18,8 @@ class StoreEmbeddingsHandler(handlers.Handler):
         parsed_event = base_event.BaseEvent(**event)
         payload = StoreChunksPayload(**parsed_event.payload)
 
+        logger.info(f"Starting to store {len(payload.embeddings)} embeddings for knowledge_id={payload.knowledge_id}")
+
         def progress_callback(current, total):
             storage_progress = (current / total) 
             progress = int(80 + (storage_progress * 20)) # 80 to 100
@@ -27,13 +32,15 @@ class StoreEmbeddingsHandler(handlers.Handler):
                     "progress": progress
                 }
             }
+
+            callback_event = parsed_event.model_copy()
         
             
-            parsed_event.payload = progress_payload
+            callback_event.payload = progress_payload
             
             self.__producer.publish(
                 routing_key="documents.sessions.embeddings_update",
-                event=parsed_event
+                event=callback_event
             )
 
         self.__vector_repository.store_embeddings(
