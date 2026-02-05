@@ -34,7 +34,8 @@ class RabbitMqProducer:
                 properties=pika.BasicProperties(
                     delivery_mode=2,
                     content_type='application/json'
-                )
+                ),
+                mandatory=True
             )
         except Exception as e:
             logger.error(str(e))
