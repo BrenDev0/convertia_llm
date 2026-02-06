@@ -1,4 +1,5 @@
 import logging
+import asyncio
 from src.broker.domain import handlers, base_event, producer
 from src.features.embeddings.domain import embedding_service, schemas
 
@@ -32,20 +33,26 @@ class EmbedChunksHandler(handlers.AsyncHandler):
             event=parsed_event
         )
 
-        total_chunks = len(payload.chunks)
-        embeddings = []
+        workers = asyncio.Semaphore(10)
 
-        for index, chunk in enumerate(payload.chunks, start=1):
-            result = await self.__embedding_service.embed_query(
-                query=chunk.content
-            )
+        tasks = [
+            self.__task_handler(chunk.content, workers)
+            for chunk in payload.chunks
+        ]
+
+        total_chunks = len(tasks)
+        embeddings = []
+        completed = 0
+
+        for promise in asyncio.as_completed(tasks):
+            result = await promise
 
             embeddings.append(result)
 
-            chunk_progress = (index / total_chunks) 
-            progress = int(60 + (chunk_progress * 20))  # 60 to 80
-            
-            embedding_session_payload = {
+            completed += 1
+            progress = int(60 + (completed / total_chunks) * 20)
+
+            parsed_event.payload = {
                 "knowledge_id": str(payload.knowledge_id),
                 "session": {
                     "stage": "Embedding documento...",
@@ -54,12 +61,11 @@ class EmbedChunksHandler(handlers.AsyncHandler):
                 }
             }
 
-            parsed_event.payload = embedding_session_payload
-
             self.__producer.publish(
                 routing_key="documents.sessions.embeddings_update",
                 event=parsed_event
             )
+                
 
         store_chunks_payload = {
             "embeddings": embeddings,
@@ -73,6 +79,14 @@ class EmbedChunksHandler(handlers.AsyncHandler):
             routing_key="documents.text.embedded",
             event=parsed_event
         )
+        
+    async def __task_handler(
+        self,
+        chunk: str,
+        workers: asyncio.Semaphore
+    ):
+        async with workers:
+            return await self.__embedding_service.embed_query(chunk)
 
 
         
