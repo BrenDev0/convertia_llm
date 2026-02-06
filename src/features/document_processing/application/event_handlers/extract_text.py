@@ -1,6 +1,7 @@
 from src.broker.domain import handlers, base_event, producer
 from src.features.document_processing.domain import pdf_processor, schemas
 from src.http.domain.async_http_client import AsyncHttpClient
+from src.features.document_processing.application.trackers.extract_text_tracker import ExtractTextTracker
 
 class ExtractTextHandler(handlers.AsyncHandler):
     def __init__(
@@ -16,51 +17,40 @@ class ExtractTextHandler(handlers.AsyncHandler):
     async def handle(self, event):
         parsed_event = base_event.BaseEvent(**event)
         payload = schemas.ExtractTextPayload(**parsed_event.payload)
+        progress_tracker = ExtractTextTracker(
+            producer=self.__producer,
+            total_steps=2,
+            publish_every=1
+        )
 
         response = await self.__async_http_client.request(
             endpoint=payload.file_url,
             method="GET"
         )
 
-        embedding_session_payload = {
-            "knowledge_id": str(payload.knowledge_id),
-            "session": {
-                "stage": "Descargando documento...",
-                "status": "Descargado",
-                "progress": 40
-            }
-        }
-
-        parsed_event.payload = embedding_session_payload
-
-        self.__producer.publish(
-            routing_key="documents.sessions.embeddings_update",
-            event=parsed_event
-        )
+        progress = progress_tracker.step()
+        if progress_tracker.should_publish():
+            progress_tracker.publish(
+                event=parsed_event.model_copy(),
+                knowledge_id=payload.knowledge_id,
+                progress=progress
+            )
 
         file_bytes = response.content
 
-
-        embedding_session_payload = {
-            "knowledge_id": str(payload.knowledge_id),
-            "session": {
-                "stage": "Procesando documento...",
-                "status": "processando",
-                "progress": 50
-            }
-        }
-
-        parsed_event.payload = embedding_session_payload
-
-        self.__producer.publish(
-            routing_key="documents.sessions.embeddings_update",
-            event=parsed_event
-        )
         if payload.file_type == "application/pdf":
             text = self.__pdf_processor.process(file_bytes)
         
         elif payload.file_type == "text/plain" or payload.file_type == "text/markdown":
             text = file_bytes.decode('utf-8')
+
+        progress = progress_tracker.step()
+        if progress_tracker.should_publish():
+            progress_tracker.publish(
+                event=parsed_event.model_copy(),
+                knowledge_id=payload.knowledge_id,
+                progress=progress
+            )
 
         chunk_payload = schemas.ChunkTextPayload(
             knowledge_id=payload.knowledge_id,

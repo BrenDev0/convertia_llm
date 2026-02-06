@@ -21,35 +21,19 @@ def upload(
 ): 
     doc_producer: producer.Producer = Container.resolve("documents_producer")
 
-    embedings_session_payload = {
-        "knowledge_id": str(payload.knowledge_id),
-        "session": {
-            "stage": "Descargando documento...",
-            "status": "Descargando",
-            "progress": 30
-        }
-    }
-
-    event = base_event.BaseEvent(
-        user_id=payload.user_id,
-        agent_id=payload.agent_id,
-        connection_id=payload.connection_id,
-        payload=embedings_session_payload
-    )
-
-    doc_producer.publish(
-        routing_key="documents.sessions.embeddings_update",
-        event=event
-    )
-    
     extract_text_payload = ExtractTextPayload(
         knowledge_id=payload.knowledge_id,
         file_type=payload.file_type,
         file_url=payload.file_url
     )
 
-    event.payload = extract_text_payload.model_dump()
-
+    event = base_event.BaseEvent(
+        user_id=payload.user_id,
+        agent_id=payload.agent_id,
+        connection_id=payload.connection_id,
+        payload=extract_text_payload.model_dump()
+    )
+    
     doc_producer.publish(
         routing_key="documents.incomming",
         event=event

@@ -17,7 +17,6 @@ class VectorRepository(ABC):
         embeddings: List[List[float]],
         chunks: List[DocumentChunk],
         namespace: str,
-        progress_callback: Optional[Callable[[int, int], None]] = None
     ):
         raise NotImplementedError
     

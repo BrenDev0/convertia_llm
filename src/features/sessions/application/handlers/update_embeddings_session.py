@@ -18,11 +18,11 @@ class UpdateEmbeddingSession(handlers.Handler):
         session = self.__session_repository.get_session(key=key)
    
         if session:
-            session[str(payload.knowledge_id)] = payload.session
+            session[str(payload.knowledge_id)] = payload.update
 
         else: 
             session = {
-                str(payload.knowledge_id): payload.session
+                str(payload.knowledge_id): payload.update
             }
 
         self.__session_repository.set_session(
