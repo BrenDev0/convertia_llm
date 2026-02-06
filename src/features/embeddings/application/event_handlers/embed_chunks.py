@@ -25,12 +25,11 @@ class EmbedChunksHandler(handlers.AsyncHandler):
             }
         }
 
-        embedding_status_copy = parsed_event.model_copy()
-        embedding_status_copy.payload = embedding_session_payload
+        parsed_event.payload = embedding_session_payload
 
         self.__producer.publish(
             routing_key="documents.sessions.embeddings_update",
-            event=embedding_status_copy
+            event=parsed_event
         )
 
         total_chunks = len(payload.chunks)
@@ -55,13 +54,11 @@ class EmbedChunksHandler(handlers.AsyncHandler):
                 }
             }
 
-            loop_copy = parsed_event.model_copy()
-
-            loop_copy.payload = embedding_session_payload
+            parsed_event.payload = embedding_session_payload
 
             self.__producer.publish(
                 routing_key="documents.sessions.embeddings_update",
-                event=loop_copy
+                event=parsed_event
             )
 
         store_chunks_payload = {
