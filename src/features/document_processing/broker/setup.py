@@ -2,7 +2,6 @@ import logging
 from src.broker.infrastructure.pika.connection import create_connection
 logger = logging.getLogger(__name__)
 
-
 def setup_document_processing_queues():
     try:
 

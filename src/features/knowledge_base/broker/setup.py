@@ -1,4 +1,5 @@
 import logging
+from src.di.container import Container
 from src.broker.infrastructure.pika.connection import create_connection
 logger = logging.getLogger(__name__)
 
