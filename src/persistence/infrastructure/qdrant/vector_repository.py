@@ -2,6 +2,7 @@ from uuid import UUID
 import qdrant_client
 from qdrant_client import models
 from src.persistence.domain.vector_repository import VectorRepository
+from typing import Callable, Optional
 
 class QdrantVectorRepository(VectorRepository):
     def __init__(
@@ -11,14 +12,21 @@ class QdrantVectorRepository(VectorRepository):
     ):
         self.__client = qdrant_client.QdrantClient(
             url=connection_url,
-            api_key=api_key
+            api_key=api_key,
+            timeout=600,
+            check_compatibility=False  
         )
 
-    def store_embeddings(self, embeddings, chunks, namespace = "convertia"):
+    def store_embeddings(
+        self, 
+        embeddings, 
+        chunks, 
+        namespace = "convertia"
+    ):
         collection_exists = self._check_namespace_exists(name=namespace)
 
         if not collection_exists:
-            self.create_namespace(name=namespace, size= len(embedding[0]))
+            self.create_namespace(name=namespace, size= len(embeddings[0]))
 
         points = []
 
@@ -55,7 +63,7 @@ class QdrantVectorRepository(VectorRepository):
     ):
         ## https://api.qdrant.tech/api-reference/collections/create-collection
         self.__client.create_collection(
-            collection_name={name},
+            collection_name=name,
             vectors_config=models.VectorParams(
                 size=size,
                 distance=models.Distance.COSINE
@@ -88,13 +96,11 @@ class QdrantVectorRepository(VectorRepository):
         name: str
     ):
         ## http://api.qdrant.tech/api-reference/collections/collection-exists
-        res = self.__client.collection_exists(
+        return self.__client.collection_exists(
             collection_name=name
         )
 
-        collection_exists = res.result.exists # bool
-
-        return collection_exists
+        
     
     def delete_namespace(self, namespace):
         self.__client.delete_collection(collection_name=namespace)

@@ -2,15 +2,11 @@ from pydantic import BaseModel
 from uuid import UUID
 
 class ExtractTextPayload(BaseModel):
-    user_id: UUID
-    agent_id: UUID
     knowledge_id: UUID
     file_type: str
-    file_bytes: bytes
+    file_url: str
 
-class ChunkTextPayload(BaseModel):
-    user_id: UUID
-    agent_id: UUID
+class ChunkTextData(BaseModel):
     knowledge_id: UUID
     text: str
     

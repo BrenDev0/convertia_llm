@@ -1,32 +1,27 @@
 import os 
 import logging
 from src.di.container import Container
-from src.di.domain.exceptions import DependencyNotRegistered
-from src.persistence.domain import (
-    vector_repository
-)
 from src.persistence.infrastructure.qdrant.vector_repository import QdrantVectorRepository
+from src.persistence.infrastructure.redis.session_repository import RedisSessionRepository
 
 logger = logging.getLogger(__name__)
 
-def get_vector_repository() -> vector_repository.VectorRepository:
-    try:
-        instance_key = "vector_repository"
-        repository = Container.resolve(instance_key)
+def register_repositories():
+    connection_url = os.getenv("QDRANT_URL")
+    api_key = os.getenv("QDRANT_API_KEY")
+
+    if not connection_url or not api_key:
+        raise ValueError("Qdrant variables not set")
     
-    except DependencyNotRegistered:
-        connection_url = os.getenv("QDRANT_URL")
-        api_key = os.getenv("QDRANT_API_KEY")
-
-        if not connection_url or not api_key:
-            raise ValueError("Qdrant variables not set")
-
-        repository = QdrantVectorRepository(
+    Container.register_factory(
+        key="vector_repository",
+        factory=lambda: QdrantVectorRepository(
             connection_url=connection_url,
             api_key=api_key
         )
+    )
 
-        Container.register(instance_key, repository)
-        logger.debug(f"{instance_key} registered")
-
-    return repository
+    Container.register_factory(
+        key="session_repository",
+        factory=lambda: RedisSessionRepository()
+    )

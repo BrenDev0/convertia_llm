@@ -1,40 +1,70 @@
+import json
 from src.broker.domain import handlers, base_event, producer
 from src.features.document_processing.domain import text_chunker, schemas
-from src.features.embeddings.domain.schemas import EmbedChunksPayload
+from src.features.document_processing.application.trackers.chunk_text_tracker import ChunkTextTracker
+from src.persistence.domain.session_repository import SessionRepository
 
 class ChunkTextHandler(handlers.Handler):
     def __init__(
         self,
         text_chunker: text_chunker.TextChunker,
-        producer: producer.Producer
+        producer: producer.Producer,
+        session_repository: SessionRepository
     ):
         self.__text_chunker = text_chunker
         self.__producer = producer
+        self.__session_repository = session_repository
 
     def handle(self, event):
         parsed_event = base_event.BaseEvent(**event)
-        payload = schemas.ChunkTextPayload(**parsed_event.payload)
+        progress_tracker = ChunkTextTracker(
+            producer=self.__producer,
+            total_steps=1,
+            publish_every=1
+        )
+
+        session = self.__session_repository.get_session(
+            key=str(parsed_event.event_id)
+        )
+
+        if not session:
+            raise ValueError("No session found")
+        
+        data = schemas.ChunkTextData(**session)
 
         metadata = {
-            "user_id": payload.user_id,
-            "agent_id": payload.agent_id,
-            "knowledge_id": payload.knowledge_id
+            "user_id": parsed_event.user_id,
+            "agent_id": parsed_event.agent_id,
+            "knowledge_id": data.knowledge_id
         }
 
         chunks = self.__text_chunker.chunk(
-            text=payload.text,
+            text=data.text,
             metadata=metadata,
             max_tokens=1000,
             token_overlap=200
         )
 
-        embed_chunks_payload = EmbedChunksPayload(
-            chunks=chunks
-        ) 
+        progress = progress_tracker.step()
+        if progress_tracker.should_publish():
+            progress_tracker.publish(
+                event=parsed_event.model_copy(),
+                knowledge_id=data.knowledge_id,
+                progress=progress
+            )
 
-        parsed_event.payload = embed_chunks_payload.model_dump()
+        session_data = {
+            "knowledge_id": str(data.knowledge_id),
+            "chunks": [
+                chunk.model_dump(mode="json") 
+                for chunk in chunks
+            ]
+        }
 
-
+        self.__session_repository.set_session(
+            key=str(parsed_event.event_id),
+            value=json.dumps(session_data)
+        )
 
         self.__producer.publish(
             routing_key="document.text.chunked",
