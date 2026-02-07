@@ -55,7 +55,10 @@ class ChunkTextHandler(handlers.Handler):
 
         session_data = {
             "knowledge_id": str(data.knowledge_id),
-            "chunks": chunks
+            "chunks": [
+                chunk.model_dump(mode="json") 
+                for chunk in chunks
+            ]
         }
 
         self.__session_repository.set_session(

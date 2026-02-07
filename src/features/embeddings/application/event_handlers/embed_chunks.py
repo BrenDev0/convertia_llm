@@ -79,7 +79,10 @@ class EmbedChunksHandler(handlers.AsyncHandler):
                 "total_batches": total_batches,
                 "batch_index": index,
                 "embeddings": batch["embeddings"],
-                "chunks": batch["chunks"],
+                "chunks": [
+                    chunk.model_dump(mode="json")
+                    for chunk in batch["chunks"]
+                ],
                 "knowledge_id": str(data.knowledge_id)
             }
 

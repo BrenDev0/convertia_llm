@@ -1,4 +1,3 @@
-from uuid import uuid4
 import json
 from src.broker.domain import handlers, base_event, producer
 from src.features.document_processing.domain import pdf_processor, schemas
@@ -65,7 +64,7 @@ class ExtractTextHandler(handlers.AsyncHandler):
         
         self.__session_repository.set_session(
             key=str(parsed_event.event_id),
-            value=session_data.model_dump(mode="json")
+            value=json.dumps(session_data.model_dump(mode="json"))
         )
 
 

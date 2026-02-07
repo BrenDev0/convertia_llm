@@ -30,8 +30,8 @@ class RabbitMqConsumer(Consumer):
             ch.basic_ack(method.delivery_tag)
 
         except Exception:
-            logger.error(
-                f"Error handling task in queue ::: {self._queue_name}, ::: delivery_tag={method.delivery_tag} :::"
-            )
+            logger.exception(
+                    f"Error handling payload in queue {self._queue_name}"
+                )
             ch.basic_nack(method.delivery_tag, requeue=False)
 

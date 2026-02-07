@@ -7,4 +7,4 @@ class BaseEvent(BaseModel):
     connection_id: UUID
     user_id: Optional[UUID] = None
     agent_id: Optional[UUID] = None
-    payload: Optional[Dict[str, Any]]
+    payload: Optional[Dict[str, Any]] = None
