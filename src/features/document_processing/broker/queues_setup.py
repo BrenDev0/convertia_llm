@@ -1,5 +1,5 @@
 import logging
-from src.broker.infrastructure.rabbitmq.connection import create_connection
+from src.broker.infrastructure.pika.connection import create_connection
 logger = logging.getLogger(__name__)
 
 

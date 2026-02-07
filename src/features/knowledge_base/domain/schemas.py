@@ -7,7 +7,7 @@ class UpdateEmbeddingStatusPayload(BaseModel):
     knowledge_id: UUID
     is_embedded: bool
 
-class StoreChunksPayload(BaseModel):
+class StoreChunksData(BaseModel):
     total_batches: int
     batch_index: int
     chunks: List[DocumentChunk]

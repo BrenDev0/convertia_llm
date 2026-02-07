@@ -1,6 +1,6 @@
 from src.di.container import Container
 from src.features.sessions.application.handlers import update_embeddings_session
-from src.broker.infrastructure.rabbitmq.consumer import RabbitMqConsumer
+from src.broker.infrastructure.pika.consumer import RabbitMqConsumer
 
 def __register_hanlders():
     Container.register_factory(

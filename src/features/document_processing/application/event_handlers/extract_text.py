@@ -1,18 +1,23 @@
+from uuid import uuid4
+import json
 from src.broker.domain import handlers, base_event, producer
 from src.features.document_processing.domain import pdf_processor, schemas
 from src.http.domain.async_http_client import AsyncHttpClient
 from src.features.document_processing.application.trackers.extract_text_tracker import ExtractTextTracker
+from src.persistence.domain.session_repository import SessionRepository
 
 class ExtractTextHandler(handlers.AsyncHandler):
     def __init__(
         self,
         pdf_processor: pdf_processor.PdfProcessor,
         producer: producer.Producer,
-        async_http_client: AsyncHttpClient
+        async_http_client: AsyncHttpClient,
+        session_repository: SessionRepository
     ):
         self.__pdf_processor = pdf_processor
         self.__producer = producer
         self.__async_http_client = async_http_client
+        self.__session_repository = session_repository
 
     async def handle(self, event):
         parsed_event = base_event.BaseEvent(**event)
@@ -52,12 +57,20 @@ class ExtractTextHandler(handlers.AsyncHandler):
                 progress=progress
             )
 
-        chunk_payload = schemas.ChunkTextPayload(
+
+        session_data = schemas.ChunkTextData(
             knowledge_id=payload.knowledge_id,
             text=text
         )
+        
+        self.__session_repository.set_session(
+            key=str(parsed_event.event_id),
+            value=session_data.model_dump(mode="json")
+        )
 
-        parsed_event.payload = chunk_payload.model_dump()
+
+        if hasattr(parsed_event, "payload"):
+            delattr(parsed_event, "payload")
 
         self.__producer.publish(
             routing_key="documents.text.extracted",

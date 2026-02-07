@@ -6,7 +6,7 @@ class ExtractTextPayload(BaseModel):
     file_type: str
     file_url: str
 
-class ChunkTextPayload(BaseModel):
+class ChunkTextData(BaseModel):
     knowledge_id: UUID
     text: str
     

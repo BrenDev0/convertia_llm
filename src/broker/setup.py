@@ -1,5 +1,5 @@
 import logging
-from src.broker.infrastructure.rabbitmq.connection import create_connection
+from src.broker.infrastructure.pika.connection import create_connection
 from src.features.embeddings.broker import consumers_setup as embeddings_consumers, queues_setup as embeddings_queues
 from src.features.document_processing.broker import consumers_setup as document_processing_consumers, queues_setup as document_processesing_queues
 from src.features.knowledge_base.broker import consumers_setup as knowledge_base_consumers, queues_setup as knowledge_base_queues

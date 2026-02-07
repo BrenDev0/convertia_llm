@@ -1,5 +1,6 @@
 import logging
 import threading
+import asyncio
 from src.di.container import Container
 
 
@@ -7,16 +8,19 @@ logger = logging.getLogger(__name__)
 
 def setup_document_processing_consumers():
     try:
-        extract_text_consumer = Container.resolve("extract_text_consumer")
-        thread = threading.Thread(target=extract_text_consumer.start, daemon=True)
-        thread.start()
-
         chunk_text_consumer = Container.resolve("chunk_text_consumer")
-        thread = threading.Thread(target=chunk_text_consumer.start, daemon=True)
-        thread.start()
+        threading.Thread(target=chunk_text_consumer.start, daemon=True).start()
 
-        logger.info("document processing consumers setup")
+        async def start_async_consumers():
+            extract_text_consumer = Container.resolve("extract_text_consumer")
+            await asyncio.gather(
+                extract_text_consumer.start()
+            )
+
+        asyncio.run(start_async_consumers())
+
+        logger.info("Document processing consumers setup")
 
     except Exception as e:
-        logger.error("Error setting up document processing consumers")
+        logger.error(f"Error setting up document processing consumers: {e}")
         raise
