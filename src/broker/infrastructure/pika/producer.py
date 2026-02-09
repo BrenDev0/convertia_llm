@@ -42,4 +42,8 @@ class RabbitMqProducer:
             raise
 
         finally:
-            channel.close()
+            if channel is not None:
+                try:
+                    channel.close()
+                except Exception:
+                    logger.debug("Channel already closed or error closing channel")
