@@ -1,14 +1,16 @@
 import json
 from src.persistence.domain.session_repository import SessionRepository
-from src.broker.domain import base_event, handlers
+from src.broker.domain import base_event, handlers, producer
 from src.features.sessions.domain.schemas import UpdateEmbeddingSessionPayload
 
 class UpdateEmbeddingSession(handlers.Handler):
     def __init__(
         self,
-        session_repository: SessionRepository
+        session_repository: SessionRepository,
+        producer: producer.Producer
     ):
         self.__session_repository = session_repository
+        self.__producer = producer
 
     def handle(self, event):
         parsed_event = base_event.BaseEvent(**event)
@@ -29,3 +31,20 @@ class UpdateEmbeddingSession(handlers.Handler):
             key=key,
             value=json.dumps(session)
         )
+
+        broadcast_payload = {
+            "type":"STATUS",
+            "data": {
+                **payload.update,
+                "knowledge_id": str(payload.knowledge_id)
+            }
+        }
+
+        event_copy = parsed_event.model_copy()
+        event_copy.payload = broadcast_payload
+
+        self.__producer.publish(
+            routing_key="communications.websocket.broadcast",
+            event=event_copy
+        )
+
