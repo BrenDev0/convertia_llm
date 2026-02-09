@@ -7,6 +7,7 @@ from src.features.embeddings.broker import setup as embeddings_setup
 from src.features.document_processing.broker import  setup as document_processesing_setup
 from src.features.knowledge_base.broker import setup as knowledge_base_setup
 from src.features.sessions.broker import setup as sessions_setup
+from src.features.websocket.broker import setup
 logger = logging.getLogger(__name__)
 
 def __setup_exchanges():
@@ -16,6 +17,12 @@ def __setup_exchanges():
 
         channel.exchange_declare(
             exchange="documents",
+            exchange_type="topic",
+            durable=True
+        )
+
+        channel.exchange_declare(
+            exchange="communication",
             exchange_type="topic",
             durable=True
         )
@@ -37,6 +44,7 @@ def setup_broker():
     document_processesing_setup.setup_document_processing_queues()
     knowledge_base_setup.setup_knowledge_base_queues()
     sessions_setup.setup_sessions_queues()
+    setup.setup_websocket_queues()
 
     consumers = [
         Container.resolve("chunk_text_consumer"),
@@ -48,6 +56,7 @@ def setup_broker():
         Container.resolve("extract_text_consumer"),
         Container.resolve("embed_chunks_consumer"),
         Container.resolve("update_embeddings_status_consumer"), 
+        Container.resolve("broadcasting_consumer")
     ]
 
     for consumer in consumers:
