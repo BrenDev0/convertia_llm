@@ -82,4 +82,5 @@ async def async_ws_connect(
     
     except WebSocketDisconnect:
         logger.debug(f'Websocket connection: {connection_id} closed')
+        WebsocketConnectionsContainer.remove_connection(connection_id=connection_id)
 
