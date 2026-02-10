@@ -19,7 +19,6 @@ router = APIRouter(
     tags=["Websocket"]
 )
 
-
 def verify_hmac_ws(signature: str, payload: str) -> bool:
     """
     Verify HMAC signature for WebSocket connections.
@@ -112,7 +111,7 @@ async def async_ws_connect(
                             "file_type": payload.file_type,
                             "file_url": payload.file_url
                         }
-                        
+
                         event = base_event.BaseEvent(
                             event_id=uuid4(),
                             user_id=payload.user_id,
