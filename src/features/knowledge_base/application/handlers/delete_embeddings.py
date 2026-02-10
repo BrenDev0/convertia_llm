@@ -21,6 +21,7 @@ class DeleteEmbeddingsHandler(handlers.Handler):
         payload = schemas.DeleteEmbeddingsPayload(**parsed_event.payload)
 
         try:
+            logger.debug("in delete embeddings::::::::::::::::")
             self.__vector_repository.delete_embeddings(
                 key="knowledge_id",
                 value=payload.knowledge_id,
@@ -46,7 +47,7 @@ class DeleteEmbeddingsHandler(handlers.Handler):
 
         embedding_status_payload = schemas.UpdateEmbeddingStatusPayload(
             knowledge_id=payload.knowledge_id,
-            status="UNPROCESSED"
+            status="NO PROCESADO"
         )
 
         parsed_event.payload = embedding_status_payload.model_dump()
