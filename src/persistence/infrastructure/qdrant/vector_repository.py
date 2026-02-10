@@ -114,7 +114,7 @@ class QdrantVectorRepository(VectorRepository):
                     must=[
                         models.FieldCondition(
                             key=key,
-                            match=models.MatchValue(value=value)
+                            match=models.MatchValue(value=str(value))
                         )
                     ]
                 )
