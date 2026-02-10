@@ -21,8 +21,7 @@ class QdrantVectorRepository(VectorRepository):
         self, 
         embeddings, 
         chunks, 
-        namespace = "convertia",
-        progress_callback: Optional[Callable[[int, int], None]] = None
+        namespace = "convertia"
     ):
         collection_exists = self._check_namespace_exists(name=namespace)
 
@@ -46,7 +45,6 @@ class QdrantVectorRepository(VectorRepository):
 
         
         batch_size = 64
-        total_batches = len(points)
         for i in range(0, len(points), batch_size):
             batch = points[i:i + batch_size]
             ## https://api.qdrant.tech/api-reference/points/upsert-points
@@ -54,9 +52,6 @@ class QdrantVectorRepository(VectorRepository):
                 collection_name=namespace,
                 points=batch
             )
-
-            if progress_callback:
-                progress_callback(min(i + batch_size, total_batches), total_batches)
         
 
         return 

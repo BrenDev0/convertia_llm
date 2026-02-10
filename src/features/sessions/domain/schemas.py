@@ -4,4 +4,4 @@ from typing import Dict, Union
 
 class UpdateEmbeddingSessionPayload(BaseModel):
     knowledge_id: UUID
-    session: Dict[str, Union[str, int]]
+    update: Dict[str, Union[str, int]]

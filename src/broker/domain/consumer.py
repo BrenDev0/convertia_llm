@@ -9,5 +9,15 @@ class Consumer(ABC):
     @abstractmethod
     def handle(self, payload: Dict[str, Any]):
         raise NotImplementedError
+    
+  
+class AsyncConsumer(ABC):
+    @abstractmethod
+    def start(self):
+      raise NotImplementedError
+
+    @abstractmethod
+    async def handle(self, payload: Dict[str, Any]):
+        raise NotImplementedError
 
     

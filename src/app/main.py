@@ -22,6 +22,8 @@ def main():
     logging.getLogger("asyncio").setLevel(logging.WARNING)
     logging.getLogger("botocore").setLevel(logging.WARNING)
     logging.getLogger("openai._base_client").setLevel(logging.WARNING)
+    logging.getLogger("aiormq.connection").setLevel(logging.WARNING)
+    logging.getLogger("aio_pika").setLevel(logging.WARNING)
 
     logger = logging.getLogger(__name__)
     logger.debug("!!!!! LOGGER LEVEL SET TO DEBUG !!!!!")
