@@ -27,26 +27,39 @@ class ExtractTextHandler(handlers.AsyncHandler):
             publish_every=1
         )
 
-        response = await self.__async_http_client.request(
-            endpoint=payload.file_url,
-            method="GET"
-        )
+        try:
 
-        progress = progress_tracker.step()
-        if progress_tracker.should_publish():
+            response = await self.__async_http_client.request(
+                endpoint=payload.file_url,
+                method="GET"
+            )
+
+        
+            progress = progress_tracker.step()
+            if progress_tracker.should_publish():
+                progress_tracker.publish(
+                    event=parsed_event.model_copy(),
+                    knowledge_id=payload.knowledge_id,
+                    progress=progress
+                )
+
+            file_bytes = response.content
+
+            if payload.file_type == "application/pdf":
+                text = self.__pdf_processor.process(file_bytes)
+            
+            elif payload.file_type == "text/plain" or payload.file_type == "text/markdown":
+                text = file_bytes.decode('utf-8')
+
+        except Exception:
             progress_tracker.publish(
                 event=parsed_event.model_copy(),
                 knowledge_id=payload.knowledge_id,
-                progress=progress
+                progress=progress,
+                error=True
             )
+            raise
 
-        file_bytes = response.content
-
-        if payload.file_type == "application/pdf":
-            text = self.__pdf_processor.process(file_bytes)
-        
-        elif payload.file_type == "text/plain" or payload.file_type == "text/markdown":
-            text = file_bytes.decode('utf-8')
 
         progress = progress_tracker.step()
         if progress_tracker.should_publish():

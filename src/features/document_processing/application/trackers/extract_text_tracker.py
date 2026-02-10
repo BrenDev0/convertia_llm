@@ -27,7 +27,8 @@ class ExtractTextTracker(ProgressTracker):
         self,
         event: base_event.BaseEvent,
         knowledge_id: UUID,
-        progress: int
+        progress: int,
+        error: bool = False
     ):
         payload = {
             "knowledge_id": knowledge_id,
@@ -36,7 +37,16 @@ class ExtractTextTracker(ProgressTracker):
                 "status": "Descargando documento...",
                 "progress": progress
             }
-            
+        }
+
+        if error:
+            payload = {
+            "knowledge_id": knowledge_id,
+            "update": {
+                "stage": self._stage.name,
+                "status": "Error descargando documento",
+                "progress": 0
+            }  
         }
 
         event_copy = event.model_copy()

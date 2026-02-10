@@ -45,17 +45,27 @@ class EmbedChunksHandler(handlers.AsyncHandler):
         )
 
         for promise in asyncio.as_completed(tasks):
-            result = await promise
+            try:
+                result = await promise
 
-            embeddings.append(result)
-            progress = progress_tracker.step()
+                embeddings.append(result)
+                progress = progress_tracker.step()
 
-            if progress_tracker.should_publish():
+                if progress_tracker.should_publish():
+                    progress_tracker.publish(
+                        event=parsed_event.model_copy(),
+                        knowledge_id=data.knowledge_id,
+                        progress=progress
+                    )
+                    
+            except Exception:
                 progress_tracker.publish(
                     event=parsed_event.model_copy(),
                     knowledge_id=data.knowledge_id,
-                    progress=progress
+                    progress=progress,
+                    error=True
                 )
+                raise 
         
         self.__session_repository.delete_session(
             key=str(parsed_event.event_id)
