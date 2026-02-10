@@ -23,7 +23,7 @@ def __register_handlers():
     Container.register_factory(
         key="delete_embeddings_handler",
         factory=lambda: delete_embeddings.DeleteEmbeddingsHandler(
-            vector_repository=Container.resolve("vector_repsoitory"),
+            vector_repository=Container.resolve("vector_repository"),
             documents_producer=producer.RabbitMqProducer("documents"),
             communication_producer=producer.RabbitMqProducer(exchange="communication")
         )

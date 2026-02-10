@@ -9,7 +9,7 @@ def setup_knowledge_base_queues():
 
         channel.queue_declare("documents.store_embeddings.q")
         channel.queue_declare("documents.update_embedding_status.q")
-        channel.queue_declare("delete_embeddings_consumer")
+        channel.queue_declare("documents.delete_embeddings.q")
 
         channel.queue_bind(
             exchange="documents",
