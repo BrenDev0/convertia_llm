@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Body
 from fastapi.responses import JSONResponse
 from src.di.container import Container
 from src.app.interface.fastapi.middleware.hmac import verify_hmac
-from src.features.document_processing.domain.schemas import DownloadDocumentPayload, ExtractTextPayload
+from src.features.document_processing.domain.schemas import DownloadDocumentPayloadRest, ExtractTextPayload
 from src.broker.domain import base_event, producer
 from src.broker.infrastructure.pika.producer import RabbitMqProducer
 
@@ -23,7 +23,7 @@ def get_producer():
 
 @router.post("/knowledge-base", status_code=202)
 def upload(
-    payload: DownloadDocumentPayload = Body(...),
+    payload: DownloadDocumentPayloadRest = Body(...),
     producer: producer.Producer = Depends(get_producer)
 ): 
     extract_text_payload = ExtractTextPayload(
