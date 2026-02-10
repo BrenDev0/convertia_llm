@@ -39,6 +39,18 @@ def upload(
         connection_id=payload.connection_id,
         payload=extract_text_payload.model_dump()
     )
+
+    update_status_payload = {
+        "knowledge_id": payload.knowledge_id,
+        "status": "PROCESSING"
+    }
+
+    event.payload = update_status_payload
+    
+    producer.publish(
+        routing_key="documents.status.update",
+        event=event
+    )
     
     producer.publish(
         routing_key="documents.incomming",

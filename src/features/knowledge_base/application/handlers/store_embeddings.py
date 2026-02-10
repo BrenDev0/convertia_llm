@@ -59,7 +59,7 @@ class StoreEmbeddingsHandler(handlers.Handler):
         if int(data.batch_index) == int(data.total_batches):
             embedding_status_payload = schemas.UpdateEmbeddingStatusPayload(
                 knowledge_id=data.knowledge_id,
-                is_embedded=True
+                status="PROCESSED"
             )
 
             parsed_event.payload = embedding_status_payload.model_dump()

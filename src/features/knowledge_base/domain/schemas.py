@@ -5,7 +5,7 @@ from typing import List
 
 class UpdateEmbeddingStatusPayload(BaseModel):
     knowledge_id: UUID
-    is_embedded: bool
+    status: str
 
 class StoreChunksData(BaseModel):
     total_batches: int

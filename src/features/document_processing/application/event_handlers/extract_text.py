@@ -58,6 +58,19 @@ class ExtractTextHandler(handlers.AsyncHandler):
                 progress=0,
                 error=True
             )
+            
+            update_status_payload = {
+                "knowledge_id": payload.knowledge_id,
+                "status": "ERROR"
+            }
+
+            parsed_event.payload = update_status_payload
+            
+            self.__producer.publish(
+                routing_key="documents.status.update",
+                event=parsed_event
+            )
+
             raise
 
 

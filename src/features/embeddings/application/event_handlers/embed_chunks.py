@@ -65,7 +65,20 @@ class EmbedChunksHandler(handlers.AsyncHandler):
                     progress=0,
                     error=True
                 )
-                raise 
+                
+                update_status_payload = {
+                    "knowledge_id": data.knowledge_id,
+                    "status": "ERROR"
+                }
+
+                parsed_event.payload = update_status_payload
+                
+                self.__producer.publish(
+                    routing_key="documents.status.update",
+                    event=parsed_event
+                )
+
+                raise
         
         self.__session_repository.delete_session(
             key=str(parsed_event.event_id)

@@ -22,7 +22,7 @@ class UpdateEmeddingStatus(handlers.AsyncHandler):
 
         req_body = {
             "user_id": str(parsed_event.user_id),
-            "status": payload.is_embedded,
+            "status": payload.status,
             "knowledge_id": str(payload.knowledge_id)
         }
 

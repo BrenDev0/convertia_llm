@@ -46,7 +46,7 @@ class DeleteEmbeddingsHandler(handlers.Handler):
 
         embedding_status_payload = schemas.UpdateEmbeddingStatusPayload(
             knowledge_id=payload.knowledge_id,
-            is_embedded=False
+            status="UNPROCESSED"
         )
 
         parsed_event.payload = embedding_status_payload.model_dump()
