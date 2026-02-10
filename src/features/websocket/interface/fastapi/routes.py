@@ -127,7 +127,7 @@ async def async_ws_connect(
 
                     case "DELETE EMBEDDINGS":
                         try:
-                            payload = DeleteEmbeddingsPayload.model_validate(parsed_message.data, by_alias=True)
+                            payload = DeleteEmbeddingsPayload.model_validate(parsed_message.data, by_alias=False)
 
                         except Exception:
                             logger.debug(f"payload received::: {parsed_message.data}")
