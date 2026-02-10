@@ -12,7 +12,7 @@ class StoreEmbeddingsTracker(ProgressTracker):
     ):
         super().__init__(
             stage = ProgressStage(
-                name="Gaurdando",
+                name="Guardando",
                 start=80,
                 end=100
             ), 
@@ -34,11 +34,15 @@ class StoreEmbeddingsTracker(ProgressTracker):
         knowledge_id: UUID,
         progress: int
     ):
+        status = "Guardando embeddings..."
+
+        if progress == 100:
+            status = "Guardado"
         payload = {
             "knowledge_id": knowledge_id,
             "update": {
                 "stage": self._stage.name,
-                "status": "Guardando embeddings...",
+                "status": status,
                 "progress": progress
             }
             

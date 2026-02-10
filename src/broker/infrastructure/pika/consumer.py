@@ -31,7 +31,7 @@ class RabbitMqConsumer(Consumer):
 
         except Exception:
             logger.exception(
-                    f"Error handling payload in queue {self._queue_name}"
-                )
+                f"Error handling payload in queue {self._queue_name}"
+            )
             ch.basic_nack(method.delivery_tag, requeue=False)
 

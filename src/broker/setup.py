@@ -49,7 +49,8 @@ def setup_broker():
     consumers = [
         Container.resolve("chunk_text_consumer"),
         Container.resolve("store_embeddings_consumer"),
-        Container.resolve("update_embeddings_sessions_consumer")
+        Container.resolve("update_embeddings_sessions_consumer"),
+        Container.resolve("delete_embeddings_consumer")
     ]
 
     async_consumers = [

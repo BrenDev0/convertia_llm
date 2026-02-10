@@ -1,5 +1,4 @@
 import logging
-from src.di.container import Container
 from src.broker.infrastructure.pika.connection import create_connection
 logger = logging.getLogger(__name__)
 
@@ -10,6 +9,7 @@ def setup_knowledge_base_queues():
 
         channel.queue_declare("documents.store_embeddings.q")
         channel.queue_declare("documents.update_embedding_status.q")
+        channel.queue_declare("delete_embeddings_consumer")
 
         channel.queue_bind(
             exchange="documents",
@@ -20,11 +20,17 @@ def setup_knowledge_base_queues():
         channel.queue_bind(
             exchange="documents",
             queue="documents.update_embedding_status.q",
-            routing_key="documents.embeddings.stored"
+            routing_key="documents.status.update"
+        )
+
+        channel.queue_bind(
+            exchange="documents",
+            queue="documents.delete_embeddings.q",
+            routing_key="documents.embeddings.delete"
         )
         logger.info("Knowledge base queues setup")
 
-    except Exception as e:
+    except Exception:
         logger.error("Error setting up knowledge base queues")
         raise
 

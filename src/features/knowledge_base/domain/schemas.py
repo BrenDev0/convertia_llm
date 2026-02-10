@@ -13,3 +13,7 @@ class StoreChunksData(BaseModel):
     chunks: List[DocumentChunk]
     embeddings: List[List[float]]
     knowledge_id: UUID
+
+class DeleteEmbeddingsPayload(BaseModel):
+    user_id: UUID
+    knowledge_id: UUID
