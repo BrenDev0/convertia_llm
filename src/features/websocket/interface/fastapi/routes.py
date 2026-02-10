@@ -92,12 +92,14 @@ async def async_ws_connect(
     try:
         while True:
             message = await websocket.receive_json()
+            logger.debug(f"INCOMING MESSAGE ::: {message}") 
+            logger.debug(f"message type::::: {type(message)}")
 
             try:
                 parsed_message = schemas.WebsocketMessage(**message)
 
                 match parsed_message.type.upper():
-                    case "EMBED MESSAGE":
+                    case "EMBED DOCUMENT":
                         try:
                             payload = DownloadDocumentPayloadWebsocket.model_validate(parsed_message.data, by_alias=False)
 
@@ -162,7 +164,7 @@ async def async_ws_connect(
                 await websocket.send_json(error_message.model_dump())
             
             except ValidationError:
-                logger.debug(f"INCOMMING MESSAGE ::: {message}")
+                logger.error(f"Validation error: {e.errors()}")
                 error_message = schemas.WebsocketMessage(
                     type="BAD REQUEST",
                     data={
@@ -172,7 +174,7 @@ async def async_ws_connect(
                 await websocket.send_json(error_message.model_dump())
 
             except Exception:
-                logger.debug(f"INCOMMING MESSAGE ::: {message}")
+                logger.exception("Error in websocket request")
                 error_message = schemas.WebsocketMessage(
                     type="SERVER ERROR",
                     data={
