@@ -4,6 +4,7 @@ import hmac
 import hashlib
 import time
 from uuid import UUID, uuid4
+from pydantic import ValidationError
 from fastapi import APIRouter, WebSocket, status, WebSocketDisconnect, Depends
 from src.broker.domain import producer, base_event
 from src.broker.infrastructure.pika.producer import RabbitMqProducer
@@ -101,7 +102,6 @@ async def async_ws_connect(
                             payload = DownloadDocumentPayloadWebsocket.model_validate(parsed_message.data, by_alias=False)
 
                         except Exception:
-                            logger.debug(f"payload received ::: {parsed_message.data}")
                             raise exceptions.WebsocketException(
                                 detail="Invalid data sent for delete embeddings, Expected 'user_id' and 'knowledge_id'"
                             )
@@ -130,7 +130,6 @@ async def async_ws_connect(
                             payload = DeleteEmbeddingsPayload.model_validate(parsed_message.data, by_alias=True)
 
                         except Exception:
-                            logger.debug(f"payload received::: {parsed_message.data}")
                             raise exceptions.WebsocketException(
                                 detail="Invalid data sent for delete embeddings, Expected 'userId' and 'knowledgeId'"
                             )
@@ -152,6 +151,7 @@ async def async_ws_connect(
                         )
             
             except exceptions.WebsocketException as e:
+                logger.debug(f"INCOMMING MESSAGE ::: {message}")
                 error_message = schemas.WebsocketMessage(
                     type="BAD REQUEST",
                     data={
@@ -160,7 +160,9 @@ async def async_ws_connect(
                 )
 
                 await websocket.send_json(error_message.model_dump())
-            except Exception:
+            
+            except ValidationError:
+                logger.debug(f"INCOMMING MESSAGE ::: {message}")
                 error_message = schemas.WebsocketMessage(
                     type="BAD REQUEST",
                     data={
@@ -169,7 +171,17 @@ async def async_ws_connect(
                 )
                 await websocket.send_json(error_message.model_dump())
 
-            logger.debug(f"INCOMMING MESSAGE ::: {message}")
+            except Exception:
+                logger.debug(f"INCOMMING MESSAGE ::: {message}")
+                error_message = schemas.WebsocketMessage(
+                    type="SERVER ERROR",
+                    data={
+                        "detail": "Unable to process request at this time" 
+                    }
+                )
+                await websocket.send_json(error_message.model_dump())
+
+            
 
     
     except WebSocketDisconnect:
