@@ -30,7 +30,7 @@ class EmbedChunksHandler(handlers.AsyncHandler):
         
         data = schemas.EmbedChunksData(**session)
 
-        workers = asyncio.Semaphore(10) # do not overload api
+        workers = asyncio.Semaphore(20) # do not overload api
 
         tasks = [
             self.__task_handler(chunk.content, workers)
