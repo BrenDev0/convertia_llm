@@ -4,7 +4,6 @@ import hmac
 import hashlib
 import time
 from uuid import UUID, uuid4
-from pydantic import v
 from fastapi import APIRouter, WebSocket, status, WebSocketDisconnect, Depends
 from src.broker.domain import producer, base_event
 from src.broker.infrastructure.pika.producer import RabbitMqProducer
