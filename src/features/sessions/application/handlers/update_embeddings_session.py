@@ -44,7 +44,7 @@ class UpdateEmbeddingSession(handlers.Handler):
         event_copy.payload = broadcast_payload
 
         self.__producer.publish(
-            routing_key="communications.websocket.broadcast",
+            routing_key="communication.websocket.broadcast",
             event=event_copy
         )
 
