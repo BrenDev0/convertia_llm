@@ -97,95 +97,86 @@ async def async_ws_connect(
 
             try:
                 parsed_message = schemas.WebsocketMessage(**message)
-
-                match parsed_message.type.upper():
-                    case "EMBED DOCUMENT":
-                        try:
-                            payload = DownloadDocumentPayloadWebsocket.model_validate(parsed_message.data, by_alias=False)
-
-                        except Exception:
-                            raise exceptions.WebsocketException(
-                                detail="Invalid data sent for delete embeddings, Expected 'user_id' and 'knowledge_id'"
-                            )
-                        
-                        extract_text_payload = {
-                            "knowledge_id": payload.knowledge_id,
-                            "file_type": payload.file_type,
-                            "file_url": payload.file_url
-                        }
-
-                        event = base_event.BaseEvent(
-                            event_id=uuid4(),
-                            user_id=payload.user_id,
-                            agent_id=payload.agent_id,
-                            connection_id=connection_id,
-                            payload=extract_text_payload
-                        )
-
-                        documents_producer.publish(
-                            routing_key="documents.incomming",
-                            event=event
-                        )
-
-                    case "DELETE EMBEDDINGS":
-                        try:
-                            payload = DeleteEmbeddingsPayload.model_validate(parsed_message.data, by_alias=True)
-
-                        except Exception:
-                            raise exceptions.WebsocketException(
-                                detail="Invalid data sent for delete embeddings, Expected 'userId' and 'knowledgeId'"
-                            )
-
-                        event = base_event.BaseEvent(
-                            event_id=uuid4(),
-                            connection_id=connection_id,
-                            user_id=payload.user_id,
-                            payload=payload
-                        )
-
-                        documents_producer.publish(
-                            routing_key="documents.embeddings.delete",
-                            event=event
-                        )
-                    case _: 
-                        raise exceptions.WebsocketException(
-                            detail=f"Invalid message type: {parsed_message.type}, Allowed types {', '.join(ALLOWED_MESSAGE_TYPES)}"
-                        )
-            
-            except exceptions.WebsocketException as e:
-                logger.debug(f"INCOMMING MESSAGE ::: {message}")
-                error_message = schemas.WebsocketMessage(
-                    type="BAD REQUEST",
-                    data={
-                        "detail": str(e)
-                    }
-                )
-
-                await websocket.send_json(error_message.model_dump())
             
             except ValidationError:
-                logger.error(f"Validation error: {e.errors()}")
-                error_message = schemas.WebsocketMessage(
-                    type="BAD REQUEST",
-                    data={
-                        "detail": "Invalid message schema" 
+                logger.exception("Invalid message type")
+                raise exceptions.WebsocketException("Invalid message schema")
+
+            match parsed_message.type.upper():
+                case "EMBED DOCUMENT":
+                    try:
+                        payload = DownloadDocumentPayloadWebsocket.model_validate(parsed_message.data, by_alias=False)
+
+                    except Exception:
+                        raise exceptions.WebsocketException(
+                            detail="Invalid data sent for delete embeddings, Expected 'user_id' and 'knowledge_id'"
+                        )
+                    
+                    extract_text_payload = {
+                        "knowledge_id": payload.knowledge_id,
+                        "file_type": payload.file_type,
+                        "file_url": payload.file_url
                     }
-                )
-                await websocket.send_json(error_message.model_dump())
 
-            except Exception:
-                logger.exception("Error in websocket request")
-                error_message = schemas.WebsocketMessage(
-                    type="SERVER ERROR",
-                    data={
-                        "detail": "Unable to process request at this time" 
-                    }
-                )
-                await websocket.send_json(error_message.model_dump())
+                    event = base_event.BaseEvent(
+                        event_id=uuid4(),
+                        user_id=payload.user_id,
+                        agent_id=payload.agent_id,
+                        connection_id=connection_id,
+                        payload=extract_text_payload
+                    )
 
-            
+                    documents_producer.publish(
+                        routing_key="documents.incomming",
+                        event=event
+                    )
 
-    
+                case "DELETE EMBEDDINGS":
+                    try:
+                        payload = DeleteEmbeddingsPayload.model_validate(parsed_message.data, by_alias=True)
+
+                    except Exception:
+                        raise exceptions.WebsocketException(
+                            detail="Invalid data sent for delete embeddings, Expected 'userId' and 'knowledgeId'"
+                        )
+
+                    event = base_event.BaseEvent(
+                        event_id=uuid4(),
+                        connection_id=connection_id,
+                        user_id=payload.user_id,
+                        payload=payload.model_dump()
+                    )
+
+                    documents_producer.publish(
+                        routing_key="documents.embeddings.delete",
+                        event=event
+                    )
+                case _: 
+                    raise exceptions.WebsocketException(
+                        detail=f"Invalid message type: {parsed_message.type}, Allowed types {', '.join(ALLOWED_MESSAGE_TYPES)}"
+                    )
+        
+    except exceptions.WebsocketException as e:
+        logger.debug(f"INCOMMING MESSAGE ::: {message}")
+        error_message = schemas.WebsocketMessage(
+            type="BAD REQUEST",
+            data={
+                "detail": str(e)
+            }
+        )
+
+        await websocket.send_json(error_message.model_dump())
+
+    except Exception:
+        logger.exception("Error in websocket request")
+        error_message = schemas.WebsocketMessage(
+            type="SERVER ERROR",
+            data={
+                "detail": "Unable to process request at this time" 
+            }
+        )
+        await websocket.send_json(error_message.model_dump())
+
     except WebSocketDisconnect:
         logger.debug(f'Websocket connection: {connection_id} closed')
         WebsocketConnectionsContainer.remove_connection(connection_id=connection_id)
