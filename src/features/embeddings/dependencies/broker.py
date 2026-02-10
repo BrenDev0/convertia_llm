@@ -22,7 +22,8 @@ def __register_consumers():
         key="embed_chunks_consumer",
         factory=lambda: async_consumer.RabbitMqAsyncConsumer(
             queue_name="documents.embed_chunks.q",
-            handler=Container.resolve("embed_chunks_handler")
+            handler=Container.resolve("embed_chunks_handler"),
+            worker_count=10
         )
     )
 
