@@ -62,7 +62,7 @@ class EmbedChunksHandler(handlers.AsyncHandler):
                 progress_tracker.publish(
                     event=parsed_event.model_copy(),
                     knowledge_id=data.knowledge_id,
-                    progress=progress,
+                    progress=0,
                     error=True
                 )
                 raise 
