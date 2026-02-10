@@ -127,7 +127,7 @@ async def async_ws_connect(
 
                     case "DELETE EMBEDDINGS":
                         try:
-                            payload = DeleteEmbeddingsPayload.model_validate(parsed_message.data, by_alias=False)
+                            payload = DeleteEmbeddingsPayload.model_validate(parsed_message.data, by_name=True)
 
                         except Exception:
                             logger.debug(f"payload received::: {parsed_message.data}")
@@ -159,7 +159,7 @@ async def async_ws_connect(
                     }
                 )
 
-                await websocket.send_json(error_message)
+                await websocket.send_json(error_message.model_dump())
             except Exception:
                 error_message = schemas.WebsocketMessage(
                     type="BAD REQUEST",
@@ -167,7 +167,7 @@ async def async_ws_connect(
                         "detail": "Invalid message schema" 
                     }
                 )
-                await websocket.send_json(error_message)
+                await websocket.send_json(error_message.model_dump())
 
             logger.debug(f"INCOMMING MESSAGE ::: {message}")
 
