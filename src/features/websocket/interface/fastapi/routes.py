@@ -100,6 +100,7 @@ async def async_ws_connect(
                     case "EMBED MESSAGE":
                         try:
                             payload = DownloadDocumentPayloadWebsocket.model_validate(parsed_message.data, by_alias=False)
+
                         except Exception:
                             logger.debug(f"payload received ::: {parsed_message.data}")
                             raise exceptions.WebsocketException(
@@ -111,6 +112,7 @@ async def async_ws_connect(
                             "file_type": payload.file_type,
                             "file_url": payload.file_url
                         }
+                        
                         event = base_event.BaseEvent(
                             event_id=uuid4(),
                             user_id=payload.user_id,
