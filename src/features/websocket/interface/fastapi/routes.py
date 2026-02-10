@@ -127,12 +127,12 @@ async def async_ws_connect(
 
                     case "DELETE EMBEDDINGS":
                         try:
-                            payload = DeleteEmbeddingsPayload.model_validate(parsed_message.data, by_name=True)
+                            payload = DeleteEmbeddingsPayload.model_validate(parsed_message.data, by_alias=False)
 
                         except Exception:
                             logger.debug(f"payload received::: {parsed_message.data}")
                             raise exceptions.WebsocketException(
-                                detail="Invalid data sent for delete embeddings, Expected 'user_id' and 'knowledge_id'"
+                                detail="Invalid data sent for delete embeddings, Expected 'userId' and 'knowledgeId'"
                             )
 
                         event = base_event.BaseEvent(

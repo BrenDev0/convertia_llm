@@ -20,6 +20,7 @@ class DeleteEmbeddingsPayload(BaseModel):
     knowledge_id: UUID
 
     model_config=ConfigDict(
+        alias_generator=to_camel,
         populate_by_name=True,
         str_min_length=1
     )
