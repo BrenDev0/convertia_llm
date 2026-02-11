@@ -35,7 +35,8 @@ def __register_consumers():
         key="extract_text_consumer",
         factory=lambda: async_consumer.RabbitMqAsyncConsumer(
             queue_name="documents.extract_text.q",
-            handler=Container.resolve("extract_text_handler")
+            handler=Container.resolve("extract_text_handler"),
+            worker_count=10
         )
     )
 
@@ -43,7 +44,8 @@ def __register_consumers():
         key="chunk_text_consumer",
         factory=lambda: consumer.RabbitMqConsumer(
             queue_name="documents.chunk_text.q",
-            handler=Container.resolve("chunk_text_handler")
+            handler=Container.resolve("chunk_text_handler"),
+            worker_count=10
         )
     )
 

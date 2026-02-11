@@ -35,11 +35,16 @@ class RabbitMqProducer:
                 properties=pika.BasicProperties(
                     delivery_mode=2,
                     content_type='application/json'
-                )
+                ),
+                mandatory=True
             )
         except Exception as e:
             logger.error(f"Error publishing to ::: {routing_key} ::: error ::: {e}")
             raise
 
         finally:
-            channel.close()
+            if channel is not None:
+                try:
+                    channel.close()
+                except Exception:
+                    logger.debug("Channel already closed or error closing channel")

@@ -27,26 +27,52 @@ class ExtractTextHandler(handlers.AsyncHandler):
             publish_every=1
         )
 
-        response = await self.__async_http_client.request(
-            endpoint=payload.file_url,
-            method="GET"
-        )
+        try:
 
-        progress = progress_tracker.step()
-        if progress_tracker.should_publish():
+            response = await self.__async_http_client.request(
+                endpoint=payload.file_url,
+                method="GET"
+            )
+
+        
+            progress = progress_tracker.step()
+            if progress_tracker.should_publish():
+                progress_tracker.publish(
+                    event=parsed_event.model_copy(),
+                    knowledge_id=payload.knowledge_id,
+                    progress=progress
+                )
+
+            file_bytes = response.content
+
+            if payload.file_type == "application/pdf":
+                text = self.__pdf_processor.process(file_bytes)
+            
+            elif payload.file_type == "text/plain" or payload.file_type == "text/markdown":
+                text = file_bytes.decode('utf-8')
+
+        except Exception:
             progress_tracker.publish(
                 event=parsed_event.model_copy(),
                 knowledge_id=payload.knowledge_id,
-                progress=progress
+                progress=0,
+                error=True
+            )
+            
+            update_status_payload = {
+                "knowledge_id": payload.knowledge_id,
+                "status": "ERROR"
+            }
+
+            parsed_event.payload = update_status_payload
+            
+            self.__producer.publish(
+                routing_key="documents.status.update",
+                event=parsed_event
             )
 
-        file_bytes = response.content
+            raise
 
-        if payload.file_type == "application/pdf":
-            text = self.__pdf_processor.process(file_bytes)
-        
-        elif payload.file_type == "text/plain" or payload.file_type == "text/markdown":
-            text = file_bytes.decode('utf-8')
 
         progress = progress_tracker.step()
         if progress_tracker.should_publish():

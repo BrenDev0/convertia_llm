@@ -38,12 +38,34 @@ class ChunkTextHandler(handlers.Handler):
             "knowledge_id": data.knowledge_id
         }
 
-        chunks = self.__text_chunker.chunk(
-            text=data.text,
-            metadata=metadata,
-            max_tokens=1000,
-            token_overlap=200
-        )
+        try:
+            chunks = self.__text_chunker.chunk(
+                text=data.text,
+                metadata=metadata,
+                max_tokens=1000,
+                token_overlap=200
+            )
+
+        except Exception:
+            progress_tracker.publish(
+                event=parsed_event.model_copy(),
+                knowledge_id=data.knowledge_id,
+                progress=0,
+                error=True
+            )
+            update_status_payload = {
+                "knowledge_id": data.knowledge_id,
+                "status": "ERROR"
+            }
+
+            parsed_event.payload = update_status_payload
+            
+            self.__producer.publish(
+                routing_key="documents.status.update",
+                event=parsed_event
+            )
+
+            raise
 
         progress = progress_tracker.step()
         if progress_tracker.should_publish():

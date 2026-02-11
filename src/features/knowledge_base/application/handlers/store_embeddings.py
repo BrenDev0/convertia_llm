@@ -59,13 +59,13 @@ class StoreEmbeddingsHandler(handlers.Handler):
         if int(data.batch_index) == int(data.total_batches):
             embedding_status_payload = schemas.UpdateEmbeddingStatusPayload(
                 knowledge_id=data.knowledge_id,
-                is_embedded=True
+                status="PROCESADO"
             )
 
             parsed_event.payload = embedding_status_payload.model_dump()
 
             self.__producer.publish(
-                routing_key="documents.embeddings.stored",
+                routing_key="documents.status.update",
                 event=parsed_event
 
             )

@@ -27,7 +27,8 @@ class EmbeddingsProgressTracker(ProgressTracker):
         self,
         event: base_event.BaseEvent,
         knowledge_id: UUID,
-        progress: int
+        progress: int,
+        error: bool = False
     ):
         payload = {
             "knowledge_id": knowledge_id,
@@ -35,8 +36,17 @@ class EmbeddingsProgressTracker(ProgressTracker):
                 "stage": self._stage.name,
                 "status": "Creando los embeddings...",
                 "progress": progress
-            }
-            
+            }  
+        }
+
+        if error:
+            payload = {
+            "knowledge_id": knowledge_id,
+            "update": {
+                "stage": self._stage.name,
+                "status": "Error creando embeddings",
+                "progress": 0
+            }  
         }
 
         event_copy = event.model_copy()

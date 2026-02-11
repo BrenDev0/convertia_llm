@@ -6,22 +6,25 @@ from src.broker.infrastructure.pika.connection import create_connection
 logger = logging.getLogger(__name__)
 
 class RabbitMqConsumer(Consumer):
-    def __init__(self, queue_name, handler):
+    def __init__(self, queue_name, handler, worker_count: int = 1):
         self._queue_name = queue_name
         self._handler = handler
+        self.__worker_count = worker_count
+        self._connection = None
+        self._channel = None
 
     def start(self):
-        connection = create_connection()
-        channel = connection.channel()
+        self.__connection = create_connection()
+        self.__channel = self.__connection.channel()
 
-        channel.basic_qos(prefetch_count=1)
-        channel.basic_consume(
+        self.__channel.basic_qos(prefetch_count=self.__worker_count)
+        self.__channel.basic_consume(
             queue=self._queue_name,
             on_message_callback=self.handle
         )
 
         logger.info(f"Listening on queue: {self._queue_name}")
-        channel.start_consuming()
+        self.__channel.start_consuming()
 
     def handle(self, ch, method, properties, body):
         try:
@@ -31,7 +34,7 @@ class RabbitMqConsumer(Consumer):
 
         except Exception:
             logger.exception(
-                    f"Error handling payload in queue {self._queue_name}"
-                )
+                f"Error handling payload in queue {self._queue_name}"
+            )
             ch.basic_nack(method.delivery_tag, requeue=False)
 

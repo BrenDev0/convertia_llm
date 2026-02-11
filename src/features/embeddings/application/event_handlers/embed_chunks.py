@@ -30,7 +30,7 @@ class EmbedChunksHandler(handlers.AsyncHandler):
         
         data = schemas.EmbedChunksData(**session)
 
-        workers = asyncio.Semaphore(10) # do not overload api
+        workers = asyncio.Semaphore(20) # do not overload api
 
         tasks = [
             self.__task_handler(chunk.content, workers)
@@ -45,17 +45,40 @@ class EmbedChunksHandler(handlers.AsyncHandler):
         )
 
         for promise in asyncio.as_completed(tasks):
-            result = await promise
+            try:
+                result = await promise
 
-            embeddings.append(result)
-            progress = progress_tracker.step()
+                embeddings.append(result)
+                progress = progress_tracker.step()
 
-            if progress_tracker.should_publish():
+                if progress_tracker.should_publish():
+                    progress_tracker.publish(
+                        event=parsed_event.model_copy(),
+                        knowledge_id=data.knowledge_id,
+                        progress=progress
+                    )
+                    
+            except Exception:
                 progress_tracker.publish(
                     event=parsed_event.model_copy(),
                     knowledge_id=data.knowledge_id,
-                    progress=progress
+                    progress=0,
+                    error=True
                 )
+                
+                update_status_payload = {
+                    "knowledge_id": data.knowledge_id,
+                    "status": "ERROR"
+                }
+
+                parsed_event.payload = update_status_payload
+                
+                self.__producer.publish(
+                    routing_key="documents.status.update",
+                    event=parsed_event
+                )
+
+                raise
         
         self.__session_repository.delete_session(
             key=str(parsed_event.event_id)
