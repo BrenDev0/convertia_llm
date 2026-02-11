@@ -25,3 +25,6 @@ class DeleteEmbeddingsPayload(BaseModel):
         str_min_length=1
     )
 
+class DeleteEmbeddingsRequest(BaseModel):
+    key: str
+    value: UUID
