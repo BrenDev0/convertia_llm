@@ -1,8 +1,4 @@
 import logging
-import os
-import hmac
-import hashlib
-import time
 from uuid import UUID, uuid4
 from pydantic import ValidationError
 from fastapi import APIRouter, WebSocket, status, WebSocketDisconnect, Depends
@@ -10,8 +6,8 @@ from src.broker.domain import producer, base_event
 from src.broker.infrastructure.pika.producer import RabbitMqProducer
 from src.features.websocket.container import WebsocketConnectionsContainer
 from src.features.websocket.domain import schemas, exceptions
-from src.features.knowledge_base.domain.schemas import DeleteEmbeddingsPayload
-from src.features.document_processing.domain.schemas import DownloadDocumentPayloadWebsocket
+from src.features.embeddings.domain.schemas import DeleteEmbeddingsPayload
+from src.security.hmac import verify_hmac_ws
 
 
 logger = logging.getLogger(__name__)
@@ -20,53 +16,15 @@ router = APIRouter(
     tags=["Websocket"]
 )
 
-def verify_hmac_ws(signature: str, payload: str) -> bool:
-    """
-    Verify HMAC signature for WebSocket connections.
-    """
-    secret = os.getenv("HMAC_SECRET")
-    if not secret:
-        logger.error("HMAC variables not set")
-        return False
-    
-    if not signature or not payload:
-        logger.debug(f"Missing signature or payload, ::: signature: {signature} ::: payload: {payload}")
-        return False
-    
-    try:
-        timestamp = int(payload)
 
-    except ValueError:
-        logger.debug(f"Invalid timestamp ::: timestamp: {timestamp}")
-        return False
-    
-    current_time = int(time.time() * 1000)
-    allowed_drift = 60_000
-
-    if abs(current_time - timestamp) > allowed_drift:
-        logger.debug(f"Expired ::: timestamp: {timestamp}, ::: current_time: {current_time}")
-        return False
-    
-    expected = hmac.new(
-        secret.encode('utf-8'),
-        payload.encode('utf-8'),
-        hashlib.sha256
-    ).hexdigest()
-
-    if not hmac.compare_digest(signature, expected):
-        logger.debug(f"Comparison failed ::: expected: {expected} ::: received: {signature}")
-        return False
-    
-    return True
-
-ALLOWED_MESSAGE_TYPES = ["EMBED DOCUMENT", "DELETE EMBEDDINGS"]
+ALLOWED_MESSAGE_TYPES = ["delete"]
 
 def get_documents_producer():
     return RabbitMqProducer(
         exchange="documents"
     )
 
-@router.websocket("/llm/{connection_id}")
+@router.websocket("/embeddings/{connection_id}")
 async def async_ws_connect(
     websocket: WebSocket,
     connection_id: UUID,
@@ -92,52 +50,28 @@ async def async_ws_connect(
     try:
         while True:
             message = await websocket.receive_json()
-            logger.debug(f"INCOMING MESSAGE ::: {message}") 
-            logger.debug(f"message type::::: {type(message)}")
-
             try:
                 parsed_message = schemas.WebsocketMessage(**message)
             
             except ValidationError:
-                logger.exception("Invalid message type")
-                raise exceptions.WebsocketException("Invalid message schema")
+                logger.error(f"Invalid message schema, received: {message}")
+                raise exceptions.WebsocketException(f"Invalid message schema expected: {', '.join(schemas.WebsocketMessage.model_fields.keys())}")
+            
+            requested_action = parsed_message.type.split(".")
+            if requested_action[0].lower() != "embeddings" or len(requested_action) < 2:
+                raise exceptions.WebsocketException(
+                    detail=f"Invalid format for message type, type must have the scope and action separated by a '.'. ex: 'embeddings.delete'. received: {parsed_message.type}"
+                )
 
-            match parsed_message.type.upper():
-                case "EMBED DOCUMENT":
-                    try:
-                        payload = DownloadDocumentPayloadWebsocket.model_validate(parsed_message.data, by_alias=False)
-
-                    except Exception:
-                        raise exceptions.WebsocketException(
-                            detail="Invalid data sent for delete embeddings, Expected 'user_id' and 'knowledge_id'"
-                        )
-                    
-                    extract_text_payload = {
-                        "knowledge_id": payload.knowledge_id,
-                        "file_type": payload.file_type,
-                        "file_url": payload.file_url
-                    }
-
-                    event = base_event.BaseEvent(
-                        event_id=uuid4(),
-                        user_id=payload.user_id,
-                        agent_id=payload.agent_id,
-                        connection_id=connection_id,
-                        payload=extract_text_payload
-                    )
-
-                    documents_producer.publish(
-                        routing_key="documents.incomming",
-                        event=event
-                    )
-
-                case "DELETE EMBEDDINGS":
+            match requested_action[1].lower():
+                case "delete":
                     try:
                         payload = DeleteEmbeddingsPayload.model_validate(parsed_message.data, by_alias=True)
 
                     except Exception:
+                        expected_keys = ', '.join(DeleteEmbeddingsPayload.model_fields.keys())
                         raise exceptions.WebsocketException(
-                            detail="Invalid data sent for delete embeddings, Expected 'userId' and 'knowledgeId'"
+                            detail=f"Invalid data sent for delete embeddings. Expected: {expected_keys}"
                         )
 
                     event = base_event.BaseEvent(
@@ -157,7 +91,7 @@ async def async_ws_connect(
                     )
         
     except exceptions.WebsocketException as e:
-        logger.debug(f"INCOMMING MESSAGE ::: {message}")
+        logger.error(f"INCOMMING MESSAGE ::: {message}")
         error_message = schemas.WebsocketMessage(
             type="BAD REQUEST",
             data={

@@ -1,8 +1,8 @@
 import logging
 from src.broker.domain import base_event, handlers, producer
 from src.persistence.domain.vector_repository import VectorRepository
-from src.features.knowledge_base.domain import schemas
-from src.features.knowledge_base.application.trackers.store_embeddings_tracker import StoreEmbeddingsTracker
+from src.features.embeddings.domain import schemas
+from src.features.embeddings.application.trackers.store_embeddings_tracker import StoreEmbeddingsTracker
 from src.persistence.domain.session_repository import SessionRepository
 
 logger = logging.getLogger(__name__)
