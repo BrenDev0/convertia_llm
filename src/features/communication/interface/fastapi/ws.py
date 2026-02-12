@@ -32,7 +32,7 @@ async def async_ws_connect(
         connection_id=connection_id,
         websocket=websocket
     )
-    logger.debug(f"Websocket connection: {connection_id} closed")
+    logger.debug(f"Websocket connection: {connection_id} registerd")
 
     try:
         while True:
