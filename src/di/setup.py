@@ -3,7 +3,7 @@ from src.features.embeddings.dependencies.setup import setup_embeddings_dependen
 from src.http.dependencies.setup import setup_http_dependencies
 from src.persistence.dependencies.setup import setup_persistence_dependencies
 from src.features.sessions.dependencies.setup import setup_sessions_dependencies
-from src.features.websocket.dependencies.setup import setup_websocket_dependencies
+from src.features.communication.dependencies.setup import setup_communication_dependencies
 
 def setup_dependencies():
     setup_document_proccessing_dependencies()
@@ -11,4 +11,4 @@ def setup_dependencies():
     setup_http_dependencies()
     setup_persistence_dependencies()
     setup_sessions_dependencies()
-    setup_websocket_dependencies()
+    setup_communication_dependencies()
