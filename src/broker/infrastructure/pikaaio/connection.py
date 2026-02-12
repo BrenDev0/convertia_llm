@@ -19,6 +19,6 @@ async def create_async_connection() -> aio_pika.RobustConnection:
     
     return await aio_pika.connect_robust(
         url,
-        heartbeat=600,
-        timeout=300, 
+        heartbeat=60,
+        timeout=15, 
     )

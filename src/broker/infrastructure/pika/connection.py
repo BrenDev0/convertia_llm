@@ -22,8 +22,8 @@ def create_connection() -> pika.BlockingConnection:
         port=port,
         virtual_host="/",
         credentials=credentials,
-        heartbeat=600,
-        blocked_connection_timeout=300,
+        heartbeat=60,
+        blocked_connection_timeout=15,
         connection_attempts=3,
         retry_delay=5,
     )
