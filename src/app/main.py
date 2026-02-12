@@ -31,7 +31,7 @@ def main():
 
     app = create_fastapi_server()
     setup_dependencies()
-    setup_broker()
+    # setup_broker()
     
     port = os.getenv("PORT", 8000)
     concurrency_limit = os.getenv("CONCURRENCY_LIMIT", 100)
