@@ -1,6 +1,6 @@
 import logging
 from src.broker.domain import base_event, handlers
-from src.features.websocket.container import WebsocketConnectionsContainer
+from src.websocket.container import WebsocketConnectionsContainer
 
 logger = logging.getLogger(__name__)
 

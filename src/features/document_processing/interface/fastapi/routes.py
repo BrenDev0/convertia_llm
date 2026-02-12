@@ -2,7 +2,6 @@ import logging
 from uuid import uuid4
 from fastapi import APIRouter, Depends, Body
 from fastapi.responses import JSONResponse
-from src.di.container import Container
 from src.app.interface.fastapi.middleware.hmac import verify_hmac
 from src.features.document_processing.domain.schemas import DownloadDocumentPayloadRest, ExtractTextPayload
 from src.broker.domain import base_event, producer
@@ -21,8 +20,8 @@ def get_producer():
         exchange="documents"
     )
 
-@router.post("/knowledge-base", status_code=202)
-def upload(
+@router.post("/", status_code=202)
+def process_document(
     payload: DownloadDocumentPayloadRest = Body(...),
     producer: producer.Producer = Depends(get_producer)
 ): 

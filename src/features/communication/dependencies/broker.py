@@ -1,6 +1,6 @@
 from src.di.container import Container
 from src.broker.infrastructure.pikaaio.async_consumer import RabbitMqAsyncConsumer
-from src.features.websocket.application.hanlders import broadcast
+from src.features.communication.application.handlers import broadcast
 
 def __register_hanlders():
     Container.register_factory(

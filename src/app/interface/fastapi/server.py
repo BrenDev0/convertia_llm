@@ -1,9 +1,10 @@
 from uuid import UUID
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.features.websocket.interface.fastapi import routes as ws_routes
-from src.features.document_processing.interface.fastapi import routes as document_router
-from src.features.websocket.container import WebsocketConnectionsContainer
+from src.features.document_processing.interface.fastapi import routes as documents_routes
+from src.features.embeddings.interface.fastapi import routes as embeddings_routes
+from src.features.communication.interface.fastapi import ws as communications_ws
+from src.websocket.container import WebsocketConnectionsContainer
 
 def create_fastapi_server():  
     app = FastAPI()
@@ -25,9 +26,11 @@ def create_fastapi_server():
         return {"status": "convertia llm ok"}
     
 
-    
-    app.include_router(ws_routes.router)
-    app.include_router(document_router.router)
+    app.include_router(documents_routes.router)
+    app.include_router(embeddings_routes.router)
+    app.include_router(communications_ws.router)
+
+
 
     @app.get("/connections", tags=["Internal"])
     async def get_websocket_connections():

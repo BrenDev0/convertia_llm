@@ -3,7 +3,7 @@ from src.broker.infrastructure.pika.connection import create_connection
 logger = logging.getLogger(__name__)
 
 
-def setup_websocket_queues():
+def setup_communication_queues():
     try:
         connection = create_connection()
         channel = connection.channel()
