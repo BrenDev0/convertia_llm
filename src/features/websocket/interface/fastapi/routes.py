@@ -166,6 +166,7 @@ async def async_ws_connect(
         )
 
         await websocket.send_json(error_message.model_dump())
+        return
 
     except Exception:
         logger.exception("Error in websocket request")
@@ -176,8 +177,10 @@ async def async_ws_connect(
             }
         )
         await websocket.send_json(error_message.model_dump())
+        return
 
     except WebSocketDisconnect:
         logger.debug(f'Websocket connection: {connection_id} closed')
         WebsocketConnectionsContainer.remove_connection(connection_id=connection_id)
+        return
 
