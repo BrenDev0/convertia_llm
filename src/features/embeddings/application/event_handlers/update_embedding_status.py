@@ -2,7 +2,7 @@ import os
 from src.broker.domain import base_event, handlers
 from src.http.domain.async_http_client import AsyncHttpClient
 from src.http.utils.hmac import generate_hmac_headers
-from src.features.knowledge_base.domain.schemas import UpdateEmbeddingStatusPayload
+from src.features.embeddings.domain.schemas import UpdateEmbeddingStatusPayload
 
 
 class UpdateEmeddingStatus(handlers.AsyncHandler):

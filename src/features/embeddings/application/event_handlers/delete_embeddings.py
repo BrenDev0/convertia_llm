@@ -1,7 +1,7 @@
 import logging
 from src.broker.domain import base_event, handlers, producer
 from src.persistence.domain.vector_repository import VectorRepository
-from src.features.knowledge_base.domain import schemas
+from src.features.embeddings.domain import schemas
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,6 @@ class DeleteEmbeddingsHandler(handlers.Handler):
         payload = schemas.DeleteEmbeddingsPayload(**parsed_event.payload)
 
         try:
-            logger.debug("in delete embeddings::::::::::::::::")
             self.__vector_repository.delete_embeddings(
                 key="knowledge_id",
                 value=payload.knowledge_id,

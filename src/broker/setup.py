@@ -5,7 +5,6 @@ from src.di.container import Container
 from src.broker.infrastructure.pika.connection import create_connection
 from src.features.embeddings.broker import setup as embeddings_setup
 from src.features.document_processing.broker import  setup as document_processesing_setup
-from src.features.knowledge_base.broker import setup as knowledge_base_setup
 from src.features.sessions.broker import setup as sessions_setup
 from src.features.websocket.broker import setup
 logger = logging.getLogger(__name__)
@@ -42,7 +41,6 @@ def setup_broker():
 
     embeddings_setup.setup_embedding_queues()
     document_processesing_setup.setup_document_processing_queues()
-    knowledge_base_setup.setup_knowledge_base_queues()
     sessions_setup.setup_sessions_queues()
     setup.setup_websocket_queues()
 

@@ -20,8 +20,8 @@ def get_producer():
         exchange="documents"
     )
 
-@router.post("/knowledge-base", status_code=202)
-def upload(
+@router.post("/", status_code=202)
+def process_document(
     payload: DownloadDocumentPayloadRest = Body(...),
     producer: producer.Producer = Depends(get_producer)
 ): 
