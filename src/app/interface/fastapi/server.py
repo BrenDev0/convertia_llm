@@ -12,6 +12,8 @@ from src.di.setup import setup_dependencies
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    print("LIFESPAN STARTED")
+
     setup_dependencies()
     await setup_broker()
     yield

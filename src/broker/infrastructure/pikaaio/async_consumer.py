@@ -22,6 +22,7 @@ class RabbitMqAsyncConsumer(consumer.AsyncConsumer):
         self.queue_name = queue_name
         self.routing_key = routing_key
         self._handler = handler
+        self._stop_event = asyncio.Event()
 
     async def handle(self, message: aio_pika.IncomingMessage):
         async with message.process():
@@ -54,4 +55,4 @@ class RabbitMqAsyncConsumer(consumer.AsyncConsumer):
 
         logger.info(f"Listening on queue: {self.queue_name}")
 
-        await asyncio.Future()
+        await self._stop_event.wait()
