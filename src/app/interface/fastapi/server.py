@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from uuid import UUID
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -5,9 +6,20 @@ from src.features.document_processing.interface.fastapi import routes as documen
 from src.features.embeddings.interface.fastapi import routes as embeddings_routes
 from src.features.communication.interface.fastapi import ws as communications_ws
 from src.websocket.container import WebsocketConnectionsContainer
+from src.broker.setup import setup_broker
+from src.di.setup import setup_dependencies
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    setup_dependencies()
+    await setup_broker()
+    yield
+   
+   
 
 def create_fastapi_server():  
-    app = FastAPI()
+    app = FastAPI(lifespan=lifespan)
 
     app.add_middleware(
         CORSMiddleware,

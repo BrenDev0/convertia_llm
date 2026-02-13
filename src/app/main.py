@@ -4,9 +4,6 @@ load_dotenv()
 import os
 import uvicorn
 from src.app.interface.fastapi.server import create_fastapi_server
-from src.broker.setup import setup_broker
-from src.di.setup import setup_dependencies
-
 
 def main():
     level = os.getenv("LOGGER_LEVEL", logging.INFO)
@@ -18,7 +15,6 @@ def main():
 
     logging.getLogger("httpx").setLevel(logging.WARNING)
     logging.getLogger("httpcore").setLevel(logging.WARNING)
-    logging.getLogger("pika").setLevel(logging.WARNING)
     logging.getLogger("asyncio").setLevel(logging.WARNING)
     logging.getLogger("botocore").setLevel(logging.WARNING)
     logging.getLogger("openai._base_client").setLevel(logging.WARNING)
@@ -30,9 +26,7 @@ def main():
 
 
     app = create_fastapi_server()
-    setup_dependencies()
-    # setup_broker()
-    
+
     port = os.getenv("PORT", 8000)
     concurrency_limit = os.getenv("CONCURRENCY_LIMIT", 100)
     uvicorn.run(
