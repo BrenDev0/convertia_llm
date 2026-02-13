@@ -13,7 +13,9 @@ def __register_consumers():
     Container.register_factory(
         key="broadcasting_consumer",
         factory=lambda: RabbitMqAsyncConsumer(
+            exchange="communication",
             queue_name="communication.websocket_broadcast.q",
+            routing_key="communication.websocket.broadcast",
             handler=Container.resolve("broadcasting_handler")
         )
     )

@@ -1,28 +1,23 @@
 import logging
-import threading
 import asyncio
 from src.di.container import Container
-from src.broker.infrastructure.pika.connection import create_connection
-from src.features.embeddings.broker import setup as embeddings_setup
-from src.features.document_processing.broker import  setup as document_processesing_setup
-from src.features.sessions.broker import setup as sessions_setup
-from src.features.communication.broker import setup as communications_setup
+from src.broker.infrastructure.pikaaio.connection import get_async_connection
 logger = logging.getLogger(__name__)
 
-def __setup_exchanges():
+async def __setup_exchanges():
     try:
-        connection = create_connection()
-        channel = connection.channel()
+        connection = await get_async_connection()
+        channel = await connection.channel()
 
-        channel.exchange_declare(
-            exchange="documents",
-            exchange_type="topic",
+        await channel.declare_exchange(
+            name="documents",
+            type="topic",
             durable=True
         )
-
-        channel.exchange_declare(
-            exchange="communication",
-            exchange_type="topic",
+       
+        await channel.declare_exchange(
+            name="communication",
+            type="topic",
             durable=True
         )
 
@@ -33,39 +28,23 @@ def __setup_exchanges():
         raise
 
     finally:
-        channel.close()
-        connection.close()
+        await channel.close()
 
-def setup_broker():
-    __setup_exchanges()
+async def setup_broker():
+    await __setup_exchanges()
 
-    embeddings_setup.setup_embedding_queues()
-    document_processesing_setup.setup_document_processing_queues()
-    sessions_setup.setup_sessions_queues()
-    communications_setup.setup_communication_queues()
-
-    consumers = [
+    async_consumers = [
         Container.resolve("chunk_text_consumer"),
         Container.resolve("store_embeddings_consumer"),
         Container.resolve("update_embeddings_sessions_consumer"),
-        Container.resolve("delete_embeddings_consumer")
-    ]
-
-    async_consumers = [
+        Container.resolve("delete_embeddings_consumer"),
         Container.resolve("extract_text_consumer"),
         Container.resolve("embed_chunks_consumer"),
-        Container.resolve("update_embeddings_status_consumer"), 
-        Container.resolve("broadcasting_consumer")
+        Container.resolve("update_embeddings_status_consumer"),
+        Container.resolve("broadcasting_consumer"),
     ]
 
-    for consumer in consumers:
-        thread = threading.Thread(target=consumer.start, daemon=True)
-        thread.start()
+    for consumer in async_consumers:
+        asyncio.create_task(consumer.start())
 
-    def start_async_loop():
-        async def run_async_consumers():
-            tasks = [consumer.start() for consumer in async_consumers]
-            await asyncio.gather(*tasks)
-        asyncio.run(run_async_consumers())
-
-    threading.Thread(target=start_async_loop, daemon=True).start()
+    logger.info("All consumers started")
