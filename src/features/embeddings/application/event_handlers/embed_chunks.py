@@ -12,7 +12,7 @@ class EmbedChunksHandler(handlers.AsyncHandler):
     def __init__(
         self,
         embedding_serivce: embedding_service.EmbeddingService,
-        producer: producer.Producer,
+        producer: producer.AsyncProducer,
         session_repository: SessionRepository
     ):
         self.__embedding_service = embedding_serivce
@@ -52,14 +52,14 @@ class EmbedChunksHandler(handlers.AsyncHandler):
                 progress = progress_tracker.step()
 
                 if progress_tracker.should_publish():
-                    progress_tracker.publish(
+                    await progress_tracker.publish(
                         event=parsed_event.model_copy(),
                         knowledge_id=data.knowledge_id,
                         progress=progress
                     )
                     
             except Exception:
-                progress_tracker.publish(
+                await progress_tracker.publish(
                     event=parsed_event.model_copy(),
                     knowledge_id=data.knowledge_id,
                     progress=0,
@@ -73,7 +73,7 @@ class EmbedChunksHandler(handlers.AsyncHandler):
 
                 parsed_event.payload = update_status_payload
                 
-                self.__producer.publish(
+                await self.__producer.publish(
                     routing_key="documents.status.update",
                     event=parsed_event
                 )
@@ -121,7 +121,7 @@ class EmbedChunksHandler(handlers.AsyncHandler):
                 value=json.dumps(store_chunks_data)
             )
             
-            self.__producer.publish(
+            await self.__producer.publish(
                 routing_key="documents.text.embedded",
                 event=batch_event
             )

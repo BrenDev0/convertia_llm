@@ -21,9 +21,9 @@ def get_producer():
     )
 
 @router.post("/", status_code=202)
-def process_document(
+async def process_document(
     payload: DownloadDocumentPayloadRest = Body(...),
-    producer: producer.Producer = Depends(get_producer)
+    producer: producer.AsyncProducer = Depends(get_producer)
 ): 
     extract_text_payload = ExtractTextPayload(
         knowledge_id=payload.knowledge_id,
@@ -39,7 +39,7 @@ def process_document(
         payload=extract_text_payload.model_dump()
     )
  
-    producer.publish(
+    await producer.publish(
         routing_key="documents.incomming",
         event=event
     )

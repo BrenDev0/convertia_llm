@@ -10,3 +10,12 @@ class Producer(ABC):
         event: Union[BaseModel, Dict[str, Any]]  
     ):
         raise NotImplementedError
+    
+class AsyncProducer(ABC):
+    @abstractmethod
+    async def publish(
+        self,
+        routing_key: str,
+        event: Union[BaseModel, Dict[str, Any]]  
+    ):
+        raise NotImplementedError
