@@ -9,7 +9,7 @@ class ExtractTextHandler(handlers.AsyncHandler):
     def __init__(
         self,
         pdf_processor: pdf_processor.PdfProcessor,
-        producer: producer.Producer,
+        producer: producer.DocumentsProducer,
         async_http_client: AsyncHttpClient,
         session_repository: SessionRepository
     ):
@@ -37,7 +37,7 @@ class ExtractTextHandler(handlers.AsyncHandler):
         
             progress = progress_tracker.step()
             if progress_tracker.should_publish():
-                progress_tracker.publish(
+                await progress_tracker.publish(
                     event=parsed_event.model_copy(),
                     knowledge_id=payload.knowledge_id,
                     progress=progress
@@ -52,7 +52,7 @@ class ExtractTextHandler(handlers.AsyncHandler):
                 text = file_bytes.decode('utf-8')
 
         except Exception:
-            progress_tracker.publish(
+            await progress_tracker.publish(
                 event=parsed_event.model_copy(),
                 knowledge_id=payload.knowledge_id,
                 progress=0,
@@ -66,7 +66,7 @@ class ExtractTextHandler(handlers.AsyncHandler):
 
             parsed_event.payload = update_status_payload
             
-            self.__producer.publish(
+            await self.__producer.publish(
                 routing_key="documents.status.update",
                 event=parsed_event
             )
@@ -76,7 +76,7 @@ class ExtractTextHandler(handlers.AsyncHandler):
 
         progress = progress_tracker.step()
         if progress_tracker.should_publish():
-            progress_tracker.publish(
+            await progress_tracker.publish(
                 event=parsed_event.model_copy(),
                 knowledge_id=payload.knowledge_id,
                 progress=progress
@@ -97,7 +97,7 @@ class ExtractTextHandler(handlers.AsyncHandler):
         if hasattr(parsed_event, "payload"):
             delattr(parsed_event, "payload")
 
-        self.__producer.publish(
+        await self.__producer.publish(
             routing_key="documents.text.extracted",
             event=parsed_event
         )

@@ -1,19 +1,25 @@
 from contextlib import asynccontextmanager
 from uuid import UUID
+from src.di.injector import Injector
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.features.document_processing.interface.fastapi import routes as documents_routes
 from src.features.embeddings.interface.fastapi import routes as embeddings_routes
 from src.features.communication.interface.fastapi import ws as communications_ws
 from src.websocket.container import WebsocketConnectionsContainer
-from src.broker.setup import setup_broker
-from src.di.setup import setup_dependencies
+from src.app.setup import setup_consumers, setup_dependencies
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    setup_dependencies()
-    await setup_broker()
+    print("LIFESPAN STARTED")
+
+    api_injector = Injector()
+
+    setup_dependencies(injector=api_injector)
+    await setup_consumers(injector=api_injector)
+
+    app.state.injector = api_injector
     yield
    
    

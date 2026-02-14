@@ -8,14 +8,14 @@ class ChunkTextHandler(handlers.Handler):
     def __init__(
         self,
         text_chunker: text_chunker.TextChunker,
-        producer: producer.Producer,
+        producer: producer.DocumentsProducer,
         session_repository: SessionRepository
     ):
         self.__text_chunker = text_chunker
         self.__producer = producer
         self.__session_repository = session_repository
 
-    def handle(self, event):
+    async def handle(self, event):
         parsed_event = base_event.BaseEvent(**event)
         progress_tracker = ChunkTextTracker(
             producer=self.__producer,
@@ -47,7 +47,7 @@ class ChunkTextHandler(handlers.Handler):
             )
 
         except Exception:
-            progress_tracker.publish(
+            await progress_tracker.publish(
                 event=parsed_event.model_copy(),
                 knowledge_id=data.knowledge_id,
                 progress=0,
@@ -60,7 +60,7 @@ class ChunkTextHandler(handlers.Handler):
 
             parsed_event.payload = update_status_payload
             
-            self.__producer.publish(
+            await self.__producer.publish(
                 routing_key="documents.status.update",
                 event=parsed_event
             )
@@ -69,7 +69,7 @@ class ChunkTextHandler(handlers.Handler):
 
         progress = progress_tracker.step()
         if progress_tracker.should_publish():
-            progress_tracker.publish(
+            await progress_tracker.publish(
                 event=parsed_event.model_copy(),
                 knowledge_id=data.knowledge_id,
                 progress=progress
@@ -88,7 +88,7 @@ class ChunkTextHandler(handlers.Handler):
             value=json.dumps(session_data)
         )
 
-        self.__producer.publish(
+        await self.__producer.publish(
             routing_key="document.text.chunked",
             event=parsed_event
         )

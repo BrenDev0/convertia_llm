@@ -7,12 +7,12 @@ class UpdateEmbeddingSession(handlers.Handler):
     def __init__(
         self,
         session_repository: SessionRepository,
-        producer: producer.Producer
+        producer: producer.CommunicationProducer
     ):
         self.__session_repository = session_repository
         self.__producer = producer
 
-    def handle(self, event):
+    async def handle(self, event):
         parsed_event = base_event.BaseEvent(**event)
         payload = UpdateEmbeddingSessionPayload(**parsed_event.payload)
 
@@ -43,7 +43,7 @@ class UpdateEmbeddingSession(handlers.Handler):
         event_copy = parsed_event.model_copy()
         event_copy.payload = broadcast_payload
 
-        self.__producer.publish(
+        await self.__producer.publish(
             routing_key="communication.websocket.broadcast",
             event=event_copy
         )

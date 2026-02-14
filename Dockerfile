@@ -16,4 +16,4 @@ ENV PATH="/app/.venv/bin:$PATH"
 COPY src/ ./src/
 
 EXPOSE 8000
-CMD ["python", "-m", "src.app.main"]
+

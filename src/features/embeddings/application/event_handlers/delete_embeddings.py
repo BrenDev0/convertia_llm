@@ -9,14 +9,14 @@ class DeleteEmbeddingsHandler(handlers.Handler):
     def __init__(
         self,
         vector_repository: VectorRepository,
-        documents_producer: producer.Producer,
-        communication_producer: producer.Producer
+        documents_producer: producer.DocumentsProducer,
+        communication_producer: producer.CommunicationProducer
     ):
         self.__vector_repository = vector_repository
         self.__documents_producer = documents_producer
         self.__communication_producer = communication_producer
 
-    def handle(self, event):
+    async def handle(self, event):
         parsed_event = base_event.BaseEvent(**event)
         payload = schemas.DeleteEmbeddingsPayload(**parsed_event.payload)
 
@@ -36,7 +36,7 @@ class DeleteEmbeddingsHandler(handlers.Handler):
             }
 
             parsed_event.payload = error_payload
-            self.__communication_producer.publish(
+            await self.__communication_producer.publish(
                 routing_key="communication.websocket.broadcast",
                 event=parsed_event
             )
@@ -51,7 +51,7 @@ class DeleteEmbeddingsHandler(handlers.Handler):
 
         parsed_event.payload = embedding_status_payload.model_dump()
 
-        self.__documents_producer.publish(
+        await self.__documents_producer.publish(
             routing_key="documents.status.update",
             event=parsed_event
         )        

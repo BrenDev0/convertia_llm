@@ -6,7 +6,7 @@ from src.tracking.application.progress_tracker import ProgressTracker
 class StoreEmbeddingsTracker(ProgressTracker):
     def __init__(
         self,
-        producer: producer.Producer,
+        producer: producer.AsyncProducer,
         total_steps: int = 1, 
         publish_every: int = 1
     ):
@@ -28,7 +28,7 @@ class StoreEmbeddingsTracker(ProgressTracker):
 
 
     
-    def publish(
+    async def publish(
         self,
         event: base_event.BaseEvent,
         knowledge_id: UUID,
@@ -51,7 +51,7 @@ class StoreEmbeddingsTracker(ProgressTracker):
         event_copy = event.model_copy()
         event_copy.payload = payload
 
-        self.__producer.publish(
+        await self.__producer.publish(
             routing_key="documents.sessions.embeddings_update",
             event=event_copy
         )

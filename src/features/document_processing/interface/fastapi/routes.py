@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from src.app.interface.fastapi.middleware.hmac import verify_hmac
 from src.features.document_processing.domain.schemas import DownloadDocumentPayloadRest, ExtractTextPayload
 from src.broker.domain import base_event, producer
-from src.broker.infrastructure.pikaaio.async_producer import RabbitMqAsyncProducer
+from src.broker.infrastructure.pikaaio.async_producer import PikaAioAsyncProducer
 
 logger = logging.getLogger(__name__)
 
@@ -16,14 +16,14 @@ router = APIRouter(
 )
 
 def get_producer():
-    return RabbitMqAsyncProducer(
+    return PikaAioAsyncProducer(
         exchange="documents"
     )
 
 @router.post("/", status_code=202)
-def process_document(
+async def process_document(
     payload: DownloadDocumentPayloadRest = Body(...),
-    producer: producer.Producer = Depends(get_producer)
+    producer: producer.AsyncProducer = Depends(get_producer)
 ): 
     extract_text_payload = ExtractTextPayload(
         knowledge_id=payload.knowledge_id,
@@ -39,7 +39,7 @@ def process_document(
         payload=extract_text_payload.model_dump()
     )
  
-    producer.publish(
+    await producer.publish(
         routing_key="documents.incomming",
         event=event
     )

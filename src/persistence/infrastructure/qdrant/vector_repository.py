@@ -1,3 +1,4 @@
+import os
 from uuid import UUID
 import qdrant_client
 from qdrant_client import models
@@ -5,14 +6,16 @@ from src.persistence.domain.vector_repository import VectorRepository
 from typing import Callable, Optional
 
 class QdrantVectorRepository(VectorRepository):
-    def __init__(
-        self,
-        connection_url: str,
-        api_key: str 
-    ):
+    def __init__(self):
+        self.__connection_url = os.getenv("QDRANT_URL")
+        self.__api_key = os.getenv("QDRANT_API_KEY")
+
+        if not self.__connection_url or not self.__api_key:
+            raise ValueError("qdrant variables not set")
+        
         self.__client = qdrant_client.QdrantClient(
-            url=connection_url,
-            api_key=api_key,
+            url=self.__connection_url,
+            api_key=self.__api_key,
             timeout=600,
             check_compatibility=False  
         )
