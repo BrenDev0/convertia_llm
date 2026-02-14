@@ -5,7 +5,7 @@ from src.http.utils.hmac import generate_hmac_headers
 from src.features.embeddings.domain.schemas import UpdateEmbeddingStatusPayload
 
 
-class UpdateEmeddingStatus(handlers.AsyncHandler):
+class UpdateEmeddingStatusHandler(handlers.AsyncHandler):
     def __init__(
         self,
         async_http_client: AsyncHttpClient

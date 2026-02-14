@@ -11,7 +11,7 @@ class StoreEmbeddingsHandler(handlers.Handler):
     def __init__(
         self,
         vector_repository: VectorRepository,
-        producer: producer.AsyncProducer,
+        producer: producer.DocumentsProducer,
         session_repository: SessionRepository
     ):
         self.__vector_repository = vector_repository

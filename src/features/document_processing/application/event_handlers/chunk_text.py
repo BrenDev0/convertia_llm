@@ -8,7 +8,7 @@ class ChunkTextHandler(handlers.Handler):
     def __init__(
         self,
         text_chunker: text_chunker.TextChunker,
-        producer: producer.AsyncProducer,
+        producer: producer.DocumentsProducer,
         session_repository: SessionRepository
     ):
         self.__text_chunker = text_chunker

@@ -17,7 +17,7 @@ class EmbedChunksHandler(handlers.AsyncHandler):
     def __init__(
         self,
         embedding_serivce: embedding_service.EmbeddingService,
-        producer: producer.AsyncProducer,
+        producer: producer.DocumentsProducer,
         session_repository: SessionRepository,
     ):
         self.__embedding_service = embedding_serivce

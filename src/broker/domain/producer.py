@@ -19,3 +19,9 @@ class AsyncProducer(ABC):
         event: Union[BaseModel, Dict[str, Any]]  
     ):
         raise NotImplementedError
+    
+class DocumentsProducer(AsyncProducer):
+    pass
+
+class CommunicationProducer(AsyncProducer):
+    pass

@@ -9,8 +9,8 @@ class DeleteEmbeddingsHandler(handlers.Handler):
     def __init__(
         self,
         vector_repository: VectorRepository,
-        documents_producer: producer.AsyncProducer,
-        communication_producer: producer.AsyncProducer
+        documents_producer: producer.DocumentsProducer,
+        communication_producer: producer.CommunicationProducer
     ):
         self.__vector_repository = vector_repository
         self.__documents_producer = documents_producer

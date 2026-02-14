@@ -7,7 +7,7 @@ class UpdateEmbeddingSession(handlers.Handler):
     def __init__(
         self,
         session_repository: SessionRepository,
-        producer: producer.AsyncProducer
+        producer: producer.CommunicationProducer
     ):
         self.__session_repository = session_repository
         self.__producer = producer

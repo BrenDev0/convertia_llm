@@ -1,3 +1,4 @@
+import os
 from typing import List
 from openai import AsyncOpenAI
 from src.features.embeddings.domain import entities, embedding_service
@@ -5,8 +6,12 @@ from src.features.embeddings.infrastructure.openai.schemas import OpenAiEmbeddin
 from src.persistence.domain.entities import DocumentChunk
 
 class OpenAIEmbeddingService(embedding_service.EmbeddingService):
-    def __init__(self, api_key: str, model: str = "text-embedding-3-large"):
-        self._client = AsyncOpenAI(api_key=api_key)
+    def __init__(self, model: str = "text-embedding-3-large"):
+        self.__api_key = os.getenv("OPENAI_API_KEY")
+        if not self.__api_key:
+            raise ValueError("openai variables not set")
+        
+        self._client = AsyncOpenAI(api_key=self.__api_key)
         self._model = model
     
     async def embed_document(

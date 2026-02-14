@@ -9,7 +9,7 @@ class ExtractTextHandler(handlers.AsyncHandler):
     def __init__(
         self,
         pdf_processor: pdf_processor.PdfProcessor,
-        producer: producer.AsyncProducer,
+        producer: producer.DocumentsProducer,
         async_http_client: AsyncHttpClient,
         session_repository: SessionRepository
     ):

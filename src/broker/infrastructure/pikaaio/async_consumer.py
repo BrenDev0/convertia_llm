@@ -5,33 +5,29 @@ import logging
 import aio_pika
 from typing import Union
 from src.broker.infrastructure.pikaaio.connection import get_async_connection
-from src.broker.domain import consumer, handlers
+from src.broker.domain import consumer, handlers, queue_config
 
 logger = logging.getLogger(__name__)
 
 
-class RabbitMqAsyncConsumer(consumer.AsyncConsumer):
+class PikaAioAsyncConsumer(consumer.AsyncConsumer):
     def __init__(
         self, 
-        exchange: str, 
-        queue_name: str, 
-        routing_key: str, 
-        handler: Union[handlers.AsyncHandler, handlers.Handler]
+        config: queue_config.QueueConfig,
+        handler: handlers.AsyncHandler
     ):
-        self.exchange = exchange
-        self.queue_name = queue_name
-        self.routing_key = routing_key
+        self.exchange = config.exchange
+        self.queue_name = config.queue_name
+        self.routing_key = config.routing_key
         self._handler = handler
         self._stop_event = asyncio.Event()
 
     async def handle(self, message: aio_pika.IncomingMessage):
         async with message.process():
             payload = json.loads(message.body)
-
-            if inspect.iscoroutinefunction(self._handler.handle):
-                await self._handler.handle(payload)
-            else:
-                await asyncio.to_thread(self._handler.handle, payload)
+            
+            await self._handler.handle(payload)
+            
 
     async def start(self):
         connection = await get_async_connection()
