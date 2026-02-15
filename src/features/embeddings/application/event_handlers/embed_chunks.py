@@ -1,8 +1,9 @@
 import logging
 import asyncio
 import json
-from uuid import uuid4
-
+from typing import List
+from uuid import uuid4, UUID
+from src.persistence.domain.entities import DocumentChunk
 from src.broker.domain import handlers, base_event, producer
 from src.features.embeddings.domain import embedding_service, schemas
 from src.features.embeddings.application.trackers.embeddings_progress_tracker import (
@@ -35,11 +36,10 @@ class EmbedChunksHandler(handlers.AsyncHandler):
 
         data = schemas.EmbedChunksData(**session)
 
-        workers = asyncio.Semaphore(20)  # do not overload api
-
-        embed_batch_size = 20  # keep <= semaphore size
+        max_concurrent = asyncio.Semaphore(20)  # do not overload api
 
         embeddings = []
+        
         progress_tracker = EmbeddingsProgressTracker(
             producer=self.__producer,
             total_steps=len(data.chunks),
@@ -47,30 +47,27 @@ class EmbedChunksHandler(handlers.AsyncHandler):
         )
 
         try:
-            for i in range(0, len(data.chunks), embed_batch_size):
-                chunk_batch = data.chunks[i : i + embed_batch_size]
+            results = await asyncio.gather(
+                *[
+                    self._task_handler(chunk.content, max_concurrent)
+                    for chunk in data.chunks
+                ],
+                return_exceptions=True,
+            )
 
-                results = await asyncio.gather(
-                    *[
-                        self.__task_handler(chunk.content, workers)
-                        for chunk in chunk_batch
-                    ],
-                    return_exceptions=True,
-                )
+            for result in results:
+                if isinstance(result, Exception):
+                    raise result
 
-                for result in results:
-                    if isinstance(result, Exception):
-                        raise result
+                embeddings.append(result)
+                progress = progress_tracker.step()
 
-                    embeddings.append(result)
-                    progress = progress_tracker.step()
-
-                    if progress_tracker.should_publish():
-                        await progress_tracker.publish(
-                            event=parsed_event.model_copy(),
-                            knowledge_id=data.knowledge_id,
-                            progress=progress,
-                        )
+                if progress_tracker.should_publish():
+                    await progress_tracker.publish(
+                        event=parsed_event.model_copy(),
+                        knowledge_id=data.knowledge_id,
+                        progress=progress,
+                    )
 
         except Exception:
             await progress_tracker.publish(
@@ -98,14 +95,41 @@ class EmbedChunksHandler(handlers.AsyncHandler):
             key=str(parsed_event.event_id)
         )
 
-        # allow next consumer to store while storing in redis
+        await self._send_batches(
+            user_id=parsed_event.user_id,
+            agent_id=parsed_event.agent_id,
+            knowledge_id=data.knowledge_id,
+            connection_id=parsed_event.connection_id,
+            chunks=data.chunks,
+            embeddings=embeddings
+        )
+        
+
+    async def _task_handler(
+        self,
+        chunk: str,
+        max_concurrent: asyncio.Semaphore,
+    ):
+        async with max_concurrent:
+            return await self.__embedding_service.embed_query(chunk)
+        
+
+    async def _send_batches(
+        self,
+        user_id: UUID,
+        agent_id: UUID,
+        knowledge_id: UUID,
+        connection_id: UUID,
+        chunks: List[DocumentChunk],
+        embeddings,
+    ):
         batch_size = 64
         batches = [
             {
-                "chunks": data.chunks[i : i + batch_size],
+                "chunks": chunks[i : i + batch_size],
                 "embeddings": embeddings[i : i + batch_size],
             }
-            for i in range(0, len(data.chunks), batch_size)
+            for i in range(0, len(chunks), batch_size)
         ]
 
         total_batches = len(batches)
@@ -119,14 +143,14 @@ class EmbedChunksHandler(handlers.AsyncHandler):
                     chunk.model_dump(mode="json")
                     for chunk in batch["chunks"]
                 ],
-                "knowledge_id": str(data.knowledge_id),
+                "knowledge_id": str(knowledge_id),
             }
 
             batch_event = base_event.BaseEvent(
                 event_id=uuid4(),
-                user_id=parsed_event.user_id,
-                agent_id=parsed_event.agent_id,
-                connection_id=parsed_event.connection_id,
+                user_id=user_id,
+                agent_id=agent_id,
+                connection_id=connection_id,
             )
 
             self.__session_repository.set_session(
@@ -138,11 +162,3 @@ class EmbedChunksHandler(handlers.AsyncHandler):
                 routing_key="documents.text.embedded",
                 event=batch_event,
             )
-
-    async def __task_handler(
-        self,
-        chunk: str,
-        workers: asyncio.Semaphore,
-    ):
-        async with workers:
-            return await self.__embedding_service.embed_query(chunk)
