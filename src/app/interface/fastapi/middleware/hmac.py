@@ -19,9 +19,9 @@ def verify_hmac(request: Request) -> bool:
     """
 
     ## disactivate for development
-    project_enviornment = os.getenv("ENVIRONMENT")
-    if project_enviornment != "PRODUCTION":
-        return
+    project_environment = os.getenv("ENVIRONMENT")
+    if project_environment != "PRODUCTION":
+        return True
 
     secret = os.getenv("HMAC_SECRET")
     if not secret:
@@ -36,21 +36,21 @@ def verify_hmac(request: Request) -> bool:
     payload = request.headers.get('x-payload')
     
     if not signature or not payload:
-        logger.debug(f"Missing signature or payload, ::: signature: {signature} ::: payload: {payload}")
+        logger.error(f"Missing signature or payload, ::: signature: {signature} ::: payload: {payload}")
         raise HMACException(detail="HMAC verification failed")
     
     # Validate timestamp
     try:
         timestamp = int(payload)
     except ValueError:
-        logger.debug(f"Invalid timestamp ::: timestamp: {timestamp}")
+        logger.error(f"Invalid timestamp ::: timestamp: {timestamp}")
         raise HMACException(detail="HMAC verification failed")
     
     current_time = int(time.time() * 1000)  # Current time in milliseconds
     allowed_drift = 60_000  # 60 seconds
     
     if abs(current_time - timestamp) > allowed_drift:
-        logger.debug(f"Expired ::: timestamp: {timestamp}, ::: current_time: {current_time}")
+        logger.error(f"Expired ::: timestamp: {timestamp}, ::: current_time: {current_time}")
         raise HMACException(detail="HMAC verification failed")
     
     # Generate expected signature
@@ -62,7 +62,7 @@ def verify_hmac(request: Request) -> bool:
     
     # Compare signatures using constant-time comparison
     if not hmac.compare_digest(signature, expected):
-        logger.debug(f"Comparison failed ::: expected: {expected} ::: received: {signature}")
+        logger.error(f"Comparison failed ::: expected: {expected} ::: received: {signature}")
         raise HMACException(detail="HMAC verification failed")
     
     return True
