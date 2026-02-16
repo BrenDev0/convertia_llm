@@ -11,8 +11,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/documents",
-    tags=["Documents"],
-    dependencies=[Depends(verify_hmac)]
+    tags=["Documents"]
 )
 
 def get_producer():
