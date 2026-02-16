@@ -7,8 +7,7 @@ from src.persistence.domain.vector_repository import VectorRepository
 
 
 router = APIRouter(
-    prefix="/embeddings",
-    dependencies=[Depends(verify_hmac)]
+    prefix="/embeddings"
 )
 
 def get_injector(request: Request):

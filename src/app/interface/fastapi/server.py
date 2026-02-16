@@ -1,13 +1,15 @@
 from contextlib import asynccontextmanager
 from uuid import UUID
 from src.di.injector import Injector
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from src.features.document_processing.interface.fastapi import routes as documents_routes
 from src.features.embeddings.interface.fastapi import routes as embeddings_routes
 from src.features.communication.interface.fastapi import ws as communications_ws
 from src.websocket.container import WebsocketConnectionsContainer
 from src.app.setup import setup_consumers, setup_dependencies
+from src.app.interface.fastapi.middleware.hmac import verify_hmac
 
 
 @asynccontextmanager
@@ -34,6 +36,18 @@ def create_fastapi_server():
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    
+    @app.middleware("http")
+    async def hmac_middleware(request: Request, call_next):
+        if not verify_hmac(request=request):
+            return JSONResponse(
+                status_code=403,
+                content={"detail": "Forbidden"}
+            )
+
+    
+        return await call_next(request)
+
 
     @app.get("/health", tags=["Internal"])
     async def health():

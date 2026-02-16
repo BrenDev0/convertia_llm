@@ -11,7 +11,8 @@ EXCLUDED_PATHS = [
     "/graphql",  # GraphQL IDE/playground
 ]
 
-async def verify_hmac(request: Request) -> bool:
+
+def verify_hmac(request: Request) -> bool:
     """
     Verify HMAC signature for incoming requests
     Use with Depends() on specific routes that need HMAC verification
@@ -22,8 +23,6 @@ async def verify_hmac(request: Request) -> bool:
     if project_enviornment != "PRODUCTION":
         return
 
-    ## 
-    
     secret = os.getenv("HMAC_SECRET")
     if not secret:
         raise ValueError("Missing HMAC_SECRET environment variable")
