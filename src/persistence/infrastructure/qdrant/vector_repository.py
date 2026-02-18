@@ -2,8 +2,7 @@ import os
 from uuid import UUID
 import qdrant_client
 from qdrant_client import models
-from src.persistence.domain.vector_repository import VectorRepository
-from typing import Callable, Optional
+from ...domain import VectorRepository
 
 class QdrantVectorRepository(VectorRepository):
     def __init__(self):

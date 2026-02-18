@@ -1,11 +1,10 @@
 import os
-from src.broker.domain import base_event, handlers
-from src.http.domain.async_http_client import AsyncHttpClient
-from src.http.utils.hmac import generate_hmac_headers
-from src.features.embeddings.domain.schemas import UpdateEmbeddingStatusPayload
+from src.broker import AsyncHandler, BaseEvent
+from src.http import AsyncHttpClient, generate_hmac_headers
+from ...domain import UpdateEmbeddingStatusPayload
 
 
-class UpdateEmeddingStatusHandler(handlers.AsyncHandler):
+class UpdateEmeddingStatusHandler(AsyncHandler):
     def __init__(
         self,
         async_http_client: AsyncHttpClient
@@ -13,7 +12,7 @@ class UpdateEmeddingStatusHandler(handlers.AsyncHandler):
         self.__async_http_client = async_http_client
 
     async def handle(self, event):
-        parsed_event = base_event.BaseEvent(**event)
+        parsed_event = BaseEvent(**event)
         payload = UpdateEmbeddingStatusPayload(**parsed_event.payload)
         
         app_host = os.getenv("APP_HOST")

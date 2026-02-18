@@ -1,6 +1,6 @@
 import io
 from pypdf import PdfReader
-from src.features.document_processing.domain.pdf_processor import PdfProcessor
+from ...domain import PdfProcessor
 
 class PypdfProcessor(PdfProcessor):
     def process(self, file_bytes):

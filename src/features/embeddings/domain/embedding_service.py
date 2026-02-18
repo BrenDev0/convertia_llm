@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
-from src.persistence.domain.entities import DocumentChunk
-from src.features.embeddings.domain.entities import EmbeddingResult
+from src.persistence import DocumentChunk
+from ..domain import EmbeddingResult
 
 class EmbeddingService(ABC):
     @abstractmethod

@@ -1,29 +1,29 @@
-from src.broker.domain import consumer, queue_config
+from src.broker import QueueConfig, AsyncConsumer
 
-class EbedChunksQueueConfig(queue_config.QueueConfig):
+class EbedChunksQueueConfig(QueueConfig):
     exchange: str = "documents"
     queue_name: str = "documents.embed_chunks.q"
     routing_key: str = "document.text.chunked"
 
 
-class StoreEmbeddingsQueueConfig(queue_config.QueueConfig):
+class StoreEmbeddingsQueueConfig(QueueConfig):
     exchange: str = "documents"
     queue_name: str = "documents.store_embeddings.q"
     routing_key: str = "documents.text.embedded"
 
 
-class UpdateEmbeddingsStatusQueueConfig(queue_config.QueueConfig):
+class UpdateEmbeddingsStatusQueueConfig(QueueConfig):
     exchange: str ="documents"
     queue_name: str ="documents.update_embedding_status.q"
     routing_key: str ="documents.status.update"
 
 
-class EmbedChunksConsumer(consumer.AsyncConsumer):
+class EmbedChunksConsumer(AsyncConsumer):
     pass
 
-class StoreEmbeddingsConsumer(consumer.AsyncConsumer):
+class StoreEmbeddingsConsumer(AsyncConsumer):
     pass
 
-class UpdateEmbeddingsStatusConsumer(consumer.AsyncConsumer):
+class UpdateEmbeddingsStatusConsumer(AsyncConsumer):
     pass
 

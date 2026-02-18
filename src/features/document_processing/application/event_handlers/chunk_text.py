@@ -1,14 +1,14 @@
 import json
-from src.broker.domain import handlers, base_event, producer
+from src.broker import BaseEvent, AsyncHandler, DocumentsProducer
 from src.features.document_processing.domain import text_chunker, schemas
 from src.features.document_processing.application.trackers.chunk_text_tracker import ChunkTextTracker
-from src.persistence.domain.session_repository import SessionRepository
+from src.persistence import SessionRepository
 
-class ChunkTextHandler(handlers.Handler):
+class ChunkTextHandler(AsyncHandler):
     def __init__(
         self,
         text_chunker: text_chunker.TextChunker,
-        producer: producer.DocumentsProducer,
+        producer: DocumentsProducer,
         session_repository: SessionRepository
     ):
         self.__text_chunker = text_chunker
@@ -16,7 +16,7 @@ class ChunkTextHandler(handlers.Handler):
         self.__session_repository = session_repository
 
     async def handle(self, event):
-        parsed_event = base_event.BaseEvent(**event)
+        parsed_event = BaseEvent(**event)
         progress_tracker = ChunkTextTracker(
             producer=self.__producer,
             total_steps=1,

@@ -1,12 +1,11 @@
 from uuid import UUID
-from src.broker.domain import base_event, producer
-from src.tracking.domain.entites import ProgressStage
-from src.tracking.application.progress_tracker import ProgressTracker
+from src.broker import BaseEvent, AsyncProducer
+from src.tracking import ProgressStage, ProgressTracker
 
 class ExtractTextTracker(ProgressTracker):
     def __init__(
         self,
-        producer: producer.AsyncProducer,
+        producer: AsyncProducer,
         total_steps: int = 1, 
         publish_every: int = 1
     ):
@@ -25,7 +24,7 @@ class ExtractTextTracker(ProgressTracker):
     
     async def publish(
         self,
-        event: base_event.BaseEvent,
+        event: BaseEvent,
         knowledge_id: UUID,
         progress: int,
         error: bool = False

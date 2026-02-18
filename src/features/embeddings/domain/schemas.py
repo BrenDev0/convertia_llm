@@ -2,7 +2,7 @@ from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 from typing import List
 from uuid import UUID
-from src.persistence.domain.entities import DocumentChunk
+from src.persistence import DocumentChunk
 
 class EmbedChunksData(BaseModel):
     knowledge_id: UUID

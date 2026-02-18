@@ -1,9 +1,8 @@
 import logging
 from uuid import UUID
 from fastapi import APIRouter, WebSocket, status, WebSocketDisconnect
-from src.websocket.container import WebsocketConnectionsContainer
-from src.websocket.domain import schemas
-from src.security.hmac import verify_hmac_ws
+from src.websocket import WebsocketConnectionsContainer, WebsocketMessage
+from src.security import verify_hmac_ws
 
 
 logger = logging.getLogger(__name__)
@@ -45,7 +44,7 @@ async def async_ws_connect(
         
     except Exception:
         logger.exception("Error in websocket request")
-        error_message = schemas.WebsocketMessage(
+        error_message = WebsocketMessage(
             type="SERVER ERROR",
             data={
                 "detail": "Unable to process request at this time" 

@@ -1,11 +1,11 @@
 import os
 from typing import List
 from openai import AsyncOpenAI
-from src.features.embeddings.domain import entities, embedding_service
-from src.features.embeddings.infrastructure.openai.schemas import OpenAiEmbeddingResposne
-from src.persistence.domain.entities import DocumentChunk
+from src.persistence import DocumentChunk
+from ...domain import EmbeddingService, EmbeddingResult
+from ...infrastructure import OpenAiEmbeddingResposne
 
-class OpenAIEmbeddingService(embedding_service.EmbeddingService):
+class OpenAIEmbeddingService(EmbeddingService):
     def __init__(self, model: str = "text-embedding-3-large"):
         self.__api_key = os.getenv("OPENAI_API_KEY")
         if not self.__api_key:
@@ -17,7 +17,7 @@ class OpenAIEmbeddingService(embedding_service.EmbeddingService):
     async def embed_document(
         self,
         document_chunks: List[DocumentChunk]
-    ) -> entities.EmbeddingResult:
+    ) -> EmbeddingResult:
         texts = [chunk.content for chunk in document_chunks]
         embeddings = []
         
@@ -32,7 +32,7 @@ class OpenAIEmbeddingService(embedding_service.EmbeddingService):
             batch_embeddings = [item.embedding for item in parsed_response.data]
             embeddings.extend(batch_embeddings)
         
-        return entities.EmbeddingResult(
+        return EmbeddingResult(
             chunks=document_chunks,
             embeddings=embeddings
         )

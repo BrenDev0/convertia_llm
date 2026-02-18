@@ -1,24 +1,24 @@
 import logging
-from src.broker.domain import base_event, handlers, producer
-from src.persistence.domain.vector_repository import VectorRepository
-from src.features.embeddings.domain import schemas
+from src.broker import BaseEvent, CommunicationProducer, DocumentsProducer, AsyncHandler
+from src.persistence import VectorRepository
+from ...domain import DeleteEmbeddingsPayload, UpdateEmbeddingStatusPayload
 
 logger = logging.getLogger(__name__)
 
-class DeleteEmbeddingsHandler(handlers.Handler):
+class DeleteEmbeddingsHandler(AsyncHandler):
     def __init__(
         self,
         vector_repository: VectorRepository,
-        documents_producer: producer.DocumentsProducer,
-        communication_producer: producer.CommunicationProducer
+        documents_producer: DocumentsProducer,
+        communication_producer: CommunicationProducer
     ):
         self.__vector_repository = vector_repository
         self.__documents_producer = documents_producer
         self.__communication_producer = communication_producer
 
     async def handle(self, event):
-        parsed_event = base_event.BaseEvent(**event)
-        payload = schemas.DeleteEmbeddingsPayload(**parsed_event.payload)
+        parsed_event = BaseEvent(**event)
+        payload = DeleteEmbeddingsPayload(**parsed_event.payload)
 
         try:
             self.__vector_repository.delete_embeddings(
@@ -44,7 +44,7 @@ class DeleteEmbeddingsHandler(handlers.Handler):
             logger.exception("Error deleting embeddings")
             return 
 
-        embedding_status_payload = schemas.UpdateEmbeddingStatusPayload(
+        embedding_status_payload = UpdateEmbeddingStatusPayload(
             knowledge_id=payload.knowledge_id,
             status="NO PROCESADO"
         )

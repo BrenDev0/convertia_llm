@@ -1,34 +1,43 @@
-from src.di.injector import Injector
-from src.features.embeddings.domain import embedding_service, consumers
-from src.features.embeddings.application.event_handlers import (
-    embed_chunks,
-    store_embeddings,
-    update_embedding_status
+from src.di import Injector
+from .domain import (
+    EmbeddingService,
+    EmbedChunksConsumer,
+    StoreEmbeddingsQueueConfig,
+    StoreEmbeddingsConsumer,
+    UpdateEmbeddingsStatusConsumer,
+    UpdateEmbeddingsStatusQueueConfig,
+    EbedChunksQueueConfig
 )
-from src.features.embeddings.infrastructure.openai.embedding_service import OpenAIEmbeddingService
-from src.features.embeddings.infrastructure.pikaaio.consumers import (
+from .application import (
+    EmbedChunksHandler,
+    StoreEmbeddingsHandler,
+    UpdateEmeddingStatusHandler
+)
+
+from .infrastructure import (
     PikaAioEmbedChunksConsumer,
     PikaAioStoreEmbeddingsConsumer,
-    PikaAioUpdateEmbeddingsStatusConsumer
+    PikaAioUpdateEmbeddingsStatusConsumer,
+    OpenAIEmbeddingService
 )
 
 
 
 def register_broker_dependencies(injector: Injector):
-    injector.register(embedding_service.EmbeddingService, OpenAIEmbeddingService)
+    injector.register(EmbeddingService, OpenAIEmbeddingService)
     
-    injector.register(embed_chunks.EmbedChunksHandler)
-    injector.register(store_embeddings.StoreEmbeddingsHandler)
-    injector.register(update_embedding_status.UpdateEmeddingStatusHandler)
+    injector.register(EmbedChunksHandler)
+    injector.register(StoreEmbeddingsHandler)
+    injector.register(UpdateEmeddingStatusHandler)
     
-    injector.register(consumers.EbedChunksQueueConfig)
-    injector.register(consumers.EmbedChunksConsumer, PikaAioEmbedChunksConsumer)
+    injector.register(EbedChunksQueueConfig)
+    injector.register(EmbedChunksConsumer, PikaAioEmbedChunksConsumer)
     
-    injector.register(consumers.StoreEmbeddingsQueueConfig)
-    injector.register(consumers.StoreEmbeddingsConsumer, PikaAioStoreEmbeddingsConsumer)
+    injector.register(StoreEmbeddingsQueueConfig)
+    injector.register(StoreEmbeddingsConsumer, PikaAioStoreEmbeddingsConsumer)
     
-    injector.register(consumers.UpdateEmbeddingsStatusQueueConfig)
-    injector.register(consumers.UpdateEmbeddingsStatusConsumer, PikaAioUpdateEmbeddingsStatusConsumer)
+    injector.register(UpdateEmbeddingsStatusQueueConfig)
+    injector.register(UpdateEmbeddingsStatusConsumer, PikaAioUpdateEmbeddingsStatusConsumer)
 
 
 def register_api_dependencies(injector: Injector):

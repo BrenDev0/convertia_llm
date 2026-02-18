@@ -4,8 +4,7 @@ from typing import Any, Dict, Union
 
 import aio_pika
 from pydantic import BaseModel
-
-from src.broker.infrastructure.pikaaio.connection import get_async_connection
+from ...infrastructure import get_async_connection
 
 logger = logging.getLogger(__name__)
 

@@ -1,14 +1,14 @@
-from src.di.injector import Injector
-from src.features.sessions.domain import consumers
-from src.features.sessions.infrastructure.pikaaio.consumers import PikaAioUpdateEmbeddingsStatusConsumer
-from src.features.sessions.application.handlers import update_embeddings_session
+from src.di import Injector
+from .domain import UpdateEmbeddingsSessionQueueConfig, UpdateEmbeddingsSessionConsumer
+from .infrastructure import PikaAioUpdateEmbeddingsStatusConsumer
+from .application import UpdateEmbeddingSession
 
 
 def register_broker_dependencies(injector: Injector):
-    injector.register(update_embeddings_session.UpdateEmbeddingSession)
+    injector.register(UpdateEmbeddingSession)
     
-    injector.register(consumers.UpdateEmbeddingsSessionQueueConfig)
-    injector.register(consumers.UpdateEmbeddingsSessionConsumer, PikaAioUpdateEmbeddingsStatusConsumer)
+    injector.register(UpdateEmbeddingsSessionQueueConfig)
+    injector.register(UpdateEmbeddingsSessionConsumer, PikaAioUpdateEmbeddingsStatusConsumer)
 
 
 def register_api_dependencies(injector: Injector):

@@ -1,20 +1,18 @@
 import asyncio
-import inspect
 import json
 import logging
 import aio_pika
-from typing import Union
-from src.broker.infrastructure.pikaaio.connection import get_async_connection
-from src.broker.domain import consumer, handlers, queue_config
+from ...infrastructure import get_async_connection
+from ...domain import AsyncConsumer, AsyncHandler,QueueConfig
 
 logger = logging.getLogger(__name__)
 
 
-class PikaAioAsyncConsumer(consumer.AsyncConsumer):
+class PikaAioAsyncConsumer(AsyncConsumer):
     def __init__(
         self, 
-        config: queue_config.QueueConfig,
-        handler: handlers.AsyncHandler
+        config: QueueConfig,
+        handler: AsyncHandler
     ):
         self.exchange = config.exchange
         self.queue_name = config.queue_name
