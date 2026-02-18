@@ -3,30 +3,30 @@ import asyncio
 import json
 from typing import List
 from uuid import uuid4, UUID
-from src.persistence.domain.entities import DocumentChunk
-from src.broker.domain import handlers, base_event, producer
-from src.features.embeddings.domain import embedding_service, schemas
-from src.features.embeddings.application.trackers.embeddings_progress_tracker import (
+from src.persistence import DocumentChunk, SessionRepository
+from src.broker import BaseEvent, DocumentsProducer, AsyncHandler
+from ...domain import EmbeddingService, EmbedChunksData
+from ...application import (
     EmbeddingsProgressTracker,
 )
-from src.persistence.domain.session_repository import SessionRepository
+
 
 logger = logging.getLogger(__name__)
 
 
-class EmbedChunksHandler(handlers.AsyncHandler):
+class EmbedChunksHandler(AsyncHandler):
     def __init__(
         self,
-        embedding_serivce: embedding_service.EmbeddingService,
-        producer: producer.DocumentsProducer,
+        embedding_serivce: EmbeddingService,
+        producer: DocumentsProducer,
         session_repository: SessionRepository,
     ):
         self.__embedding_service = embedding_serivce
         self.__producer = producer
         self.__session_repository = session_repository
 
-    async def handle(self, event: base_event.BaseEvent):
-        parsed_event = base_event.BaseEvent(**event)
+    async def handle(self, event: BaseEvent):
+        parsed_event = BaseEvent(**event)
         session = self.__session_repository.get_session(
             key=str(parsed_event.event_id)
         )
@@ -34,7 +34,7 @@ class EmbedChunksHandler(handlers.AsyncHandler):
         if not session:
             raise ValueError("No session found")
 
-        data = schemas.EmbedChunksData(**session)
+        data = EmbedChunksData(**session)
 
         max_concurrent = asyncio.Semaphore(20)  # do not overload api
 
@@ -146,7 +146,7 @@ class EmbedChunksHandler(handlers.AsyncHandler):
                 "knowledge_id": str(knowledge_id),
             }
 
-            batch_event = base_event.BaseEvent(
+            batch_event = BaseEvent(
                 event_id=uuid4(),
                 user_id=user_id,
                 agent_id=agent_id,

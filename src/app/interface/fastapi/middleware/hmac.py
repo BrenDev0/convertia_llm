@@ -4,7 +4,6 @@ import hmac
 import hashlib
 import time
 from fastapi import Request
-from src.security.domain.exceptions import HMACException
 logger = logging.getLogger(__name__)
 
 EXCLUDED_PATHS = [
@@ -37,21 +36,21 @@ def verify_hmac(request: Request) -> bool:
     
     if not signature or not payload:
         logger.error(f"Missing signature or payload, ::: signature: {signature} ::: payload: {payload}")
-        raise HMACException(detail="HMAC verification failed")
+        return False
     
     # Validate timestamp
     try:
         timestamp = int(payload)
     except ValueError:
         logger.error(f"Invalid timestamp ::: timestamp: {timestamp}")
-        raise HMACException(detail="HMAC verification failed")
+        return False
     
     current_time = int(time.time() * 1000)  # Current time in milliseconds
     allowed_drift = 60_000  # 60 seconds
     
     if abs(current_time - timestamp) > allowed_drift:
         logger.error(f"Expired ::: timestamp: {timestamp}, ::: current_time: {current_time}")
-        raise HMACException(detail="HMAC verification failed")
+        raise False
     
     # Generate expected signature
     expected = hmac.new(
@@ -63,6 +62,6 @@ def verify_hmac(request: Request) -> bool:
     # Compare signatures using constant-time comparison
     if not hmac.compare_digest(signature, expected):
         logger.error(f"Comparison failed ::: expected: {expected} ::: received: {signature}")
-        raise HMACException(detail="HMAC verification failed")
+        raise False
     
     return True

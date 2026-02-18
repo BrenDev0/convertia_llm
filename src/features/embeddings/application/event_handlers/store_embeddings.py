@@ -1,17 +1,16 @@
 import logging
-from src.broker.domain import base_event, handlers, producer
-from src.persistence.domain.vector_repository import VectorRepository
-from src.features.embeddings.domain import schemas
-from src.features.embeddings.application.trackers.store_embeddings_tracker import StoreEmbeddingsTracker
-from src.persistence.domain.session_repository import SessionRepository
+from src.broker import BaseEvent, AsyncHandler, DocumentsProducer
+from src.persistence import VectorRepository, SessionRepository
+from ...domain import StoreChunksData, UpdateEmbeddingStatusPayload
+from ...application import StoreEmbeddingsTracker
 
 logger = logging.getLogger(__name__)
 
-class StoreEmbeddingsHandler(handlers.Handler):
+class StoreEmbeddingsHandler(AsyncHandler):
     def __init__(
         self,
         vector_repository: VectorRepository,
-        producer: producer.DocumentsProducer,
+        producer: DocumentsProducer,
         session_repository: SessionRepository
     ):
         self.__vector_repository = vector_repository
@@ -19,7 +18,7 @@ class StoreEmbeddingsHandler(handlers.Handler):
         self.__session_repsoitory = session_repository
 
     async def handle(self, event):
-        parsed_event = base_event.BaseEvent(**event)
+        parsed_event = BaseEvent(**event)
         session = self.__session_repsoitory.get_session(
             key=str(parsed_event.event_id)
         )
@@ -27,7 +26,7 @@ class StoreEmbeddingsHandler(handlers.Handler):
         if not session:
             raise ValueError("No session found")
         
-        data = schemas.StoreChunksData(**session)
+        data = StoreChunksData(**session)
 
         progress_tracker = StoreEmbeddingsTracker(
             producer=self.__producer,
@@ -57,7 +56,7 @@ class StoreEmbeddingsHandler(handlers.Handler):
         )
         
         if int(data.batch_index) == int(data.total_batches):
-            embedding_status_payload = schemas.UpdateEmbeddingStatusPayload(
+            embedding_status_payload = UpdateEmbeddingStatusPayload(
                 knowledge_id=data.knowledge_id,
                 status="PROCESADO"
             )

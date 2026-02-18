@@ -1,13 +1,13 @@
 from contextlib import asynccontextmanager
 from uuid import UUID
-from src.di.injector import Injector
+from src.di import Injector
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from src.features.document_processing.interface.fastapi import routes as documents_routes
 from src.features.embeddings.interface.fastapi import routes as embeddings_routes
 from src.features.communication.interface.fastapi import ws as communications_ws
-from src.websocket.container import WebsocketConnectionsContainer
+from src.websocket import WebsocketConnectionsContainer
 from src.app.setup import setup_consumers, setup_dependencies
 from src.app.interface.fastapi.middleware.hmac import verify_hmac
 
@@ -74,7 +74,7 @@ def create_fastapi_server():
         }
 
     @app.delete("/connections/{connection_id}", tags=["Internal"])
-    async def get_websocket_connections(
+    async def delete_connection(
         connection_id: UUID
     ):
         WebsocketConnectionsContainer.remove_connection(connection_id=connection_id)

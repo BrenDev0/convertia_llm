@@ -1,4 +1,4 @@
-from src.tracking.domain.entites import ProgressStage
+from ..domain import ProgressStage
 
 
 class ProgressTracker:

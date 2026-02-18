@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any
-from src.persistence.domain.entities import DocumentChunk
+from src.persistence import DocumentChunk
 
 class TextChunker(ABC):
     @abstractmethod

@@ -1,6 +1,6 @@
 import logging
 import asyncio
-from src.di.injector import Injector
+from src.di import Injector
 from src.broker.infrastructure.pikaaio import connection, async_producer
 from src.broker.domain.producer import DocumentsProducer, CommunicationProducer
 from src.http.di import register_shared_dependencies as http_dependencies

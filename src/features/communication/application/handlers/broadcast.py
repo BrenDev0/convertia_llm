@@ -1,15 +1,15 @@
 import logging
-from src.broker.domain import base_event, handlers
-from src.websocket.container import WebsocketConnectionsContainer
+from src.broker import BaseEvent, AsyncHandler
+from src.websocket import WebsocketConnectionsContainer
 
 logger = logging.getLogger(__name__)
 
-class BroadcastHandler(handlers.AsyncHandler):
+class BroadcastHandler(AsyncHandler):
     def __init__(self):
         pass
 
     async def handle(self, event):
-        parsed_event = base_event.BaseEvent(**event)
+        parsed_event = BaseEvent(**event)
 
         websocket = WebsocketConnectionsContainer.resolve_connection(
             connection_id=parsed_event.connection_id

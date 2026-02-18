@@ -1,20 +1,20 @@
-from src.broker.domain import queue_config, consumer
+from src.broker import AsyncConsumer, QueueConfig
 
-class ExtractTextQueueConfig(queue_config.QueueConfig):
+class ExtractTextQueueConfig(QueueConfig):
     exchange:str = "documents"
     queue_name: str = "documents.extract_text.q"
     routing_key: str ="documents.incomming"
 
 
-class ChunkTextQueueConfig(queue_config.QueueConfig):
+class ChunkTextQueueConfig(QueueConfig):
     exchange: str = "documents"
     queue_name: str = "documents.chunk_text.q"
     routing_key: str = "documents.text.extracted"
 
 
-class ExtractTextConsumer(consumer.AsyncConsumer):
+class ExtractTextConsumer(AsyncConsumer):
     pass
 
 
-class ChunkTextConsumer(consumer.AsyncConsumer):
+class ChunkTextConsumer(AsyncConsumer):
     pass

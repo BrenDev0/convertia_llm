@@ -1,9 +1,8 @@
 import tiktoken
 from typing import List, Dict, Any
 from uuid import uuid4
-from src.features.document_processing.domain.text_chunker import TextChunker
-from src.persistence.domain.entities import DocumentChunk
-
+from src.persistence import DocumentChunk
+from ...domain import TextChunker
 
 class TiktokenTextChunker(TextChunker):
     def __init__(self, model_name: str = "text-embedding-3-large"):

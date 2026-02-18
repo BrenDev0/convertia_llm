@@ -1,23 +1,37 @@
-from src.di.injector import Injector
-from src.features.document_processing.domain import consumers, text_chunker, pdf_processor
-from src.features.document_processing.infrastructure.pikaaio.consumers import PikaAioChunkTextConsumer, PikaAioExtractTextConsumer
-from src.features.document_processing.infrastructure.pypdf.pdf_processor import PypdfProcessor
-from src.features.document_processing.infrastructure.tiktoken.text_chunker import TiktokenTextChunker
-from src.features.document_processing.application.event_handlers import extract_text, chunk_text
+from src.di import Injector
+from .domain import (
+    TextChunker,
+    PdfProcessor,
+    ChunkTextConsumer,
+    ChunkTextQueueConfig,
+    ExtractTextConsumer,
+    ExtractTextQueueConfig
+)
+from .infrastructure import (
+    PikaAioChunkTextConsumer, 
+    PikaAioExtractTextConsumer,
+    PypdfProcessor,
+    TiktokenTextChunker
+)
+
+from .application import (
+    ExtractTextHandler,
+    ChunkTextHandler
+)
 
 
 def register_broker_dependencies(injector: Injector):
-    injector.register(text_chunker.TextChunker, TiktokenTextChunker)
-    injector.register(pdf_processor.PdfProcessor, PypdfProcessor)
+    injector.register(TextChunker, TiktokenTextChunker)
+    injector.register(PdfProcessor, PypdfProcessor)
     
-    injector.register(extract_text.ExtractTextHandler)
-    injector.register(chunk_text.ChunkTextHandler)
+    injector.register(ExtractTextHandler)
+    injector.register(ChunkTextHandler)
 
-    injector.register(consumers.ChunkTextQueueConfig)
-    injector.register(consumers.ChunkTextConsumer, PikaAioChunkTextConsumer)
+    injector.register(ChunkTextQueueConfig)
+    injector.register(ChunkTextConsumer, PikaAioChunkTextConsumer)
     
-    injector.register(consumers.ExtractTextQueueConfig)
-    injector.register(consumers.ExtractTextConsumer, PikaAioExtractTextConsumer)
+    injector.register(ExtractTextQueueConfig)
+    injector.register(ExtractTextConsumer, PikaAioExtractTextConsumer)
 
 
 def register_api_dependencies(injector: Injector):

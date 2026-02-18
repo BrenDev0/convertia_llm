@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Depends, Body, Request
 from fastapi.responses import JSONResponse
-from src.di.injector import Injector
-from src.features.embeddings.domain import schemas
-from src.app.interface.fastapi.middleware.hmac import verify_hmac
-from src.persistence.domain.vector_repository import VectorRepository
+from src.di import Injector
+from src.persistence import VectorRepository
+from ...domain import DeleteEmbeddingsRequest
 
 
 router = APIRouter(
@@ -15,7 +14,7 @@ def get_injector(request: Request):
 
 @router.delete("/", status_code=200)
 def delete_embeddings(
-    data: schemas.DeleteEmbeddingsRequest = Body(...),
+    data: DeleteEmbeddingsRequest = Body(...),
     injector: Injector = Depends(get_injector)
 ):
     vector_repository = injector.resolve(VectorRepository)

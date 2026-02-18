@@ -1,12 +1,12 @@
-from src.broker.infrastructure.pikaaio.async_consumer import PikaAioAsyncConsumer
-from src.features.embeddings.domain.consumers import EbedChunksQueueConfig, StoreEmbeddingsQueueConfig, UpdateEmbeddingsStatusQueueConfig
-from src.features.embeddings.application.event_handlers import embed_chunks, store_embeddings, update_embedding_status
+from src.broker import PikaAioAsyncConsumer
+from ...domain import EbedChunksQueueConfig, StoreEmbeddingsQueueConfig, UpdateEmbeddingsStatusQueueConfig
+from ...application import EmbedChunksHandler, StoreEmbeddingsHandler,UpdateEmeddingStatusHandler
 
 class PikaAioEmbedChunksConsumer(PikaAioAsyncConsumer):
     def __init__(
         self, 
         config: EbedChunksQueueConfig, 
-        handler: embed_chunks.EmbedChunksHandler
+        handler: EmbedChunksHandler
     ):
         super().__init__(config, handler)
 
@@ -14,7 +14,7 @@ class PikaAioStoreEmbeddingsConsumer(PikaAioAsyncConsumer):
     def __init__(
         self, 
         config: StoreEmbeddingsQueueConfig, 
-        handler: store_embeddings.StoreEmbeddingsHandler
+        handler: StoreEmbeddingsHandler
     ):
         super().__init__(config, handler)
 
@@ -22,6 +22,6 @@ class PikaAioUpdateEmbeddingsStatusConsumer(PikaAioAsyncConsumer):
     def __init__(
         self, 
         config: UpdateEmbeddingsStatusQueueConfig, 
-        handler: update_embedding_status.UpdateEmeddingStatusHandler
+        handler: UpdateEmeddingStatusHandler
     ):
         super().__init__(config, handler)

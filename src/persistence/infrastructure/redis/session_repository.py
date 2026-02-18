@@ -2,7 +2,7 @@ import json
 from typing import Optional, Dict, Any
 from redis import Redis
 import os
-from src.persistence.domain.session_repository import SessionRepository
+from ...domain import SessionRepository
 
 
 class RedisSessionRepository(SessionRepository):

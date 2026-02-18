@@ -1,11 +1,11 @@
-from src.broker.domain import consumer, queue_config
+from src.broker import QueueConfig, AsyncConsumer
 
 
-class BroadcastingQueueConfig(queue_config.QueueConfig):
+class BroadcastingQueueConfig(QueueConfig):
     exchange: str = "communication"
     queue_name: str = "communication.websocket_broadcast.q"
     routing_key: str = "communication.websocket.broadcast"
 
 
-class BroadcastingConsumer(consumer.AsyncConsumer):
+class BroadcastingConsumer(AsyncConsumer):
     pass

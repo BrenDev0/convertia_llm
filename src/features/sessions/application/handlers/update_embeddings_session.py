@@ -1,19 +1,19 @@
 import json
-from src.persistence.domain.session_repository import SessionRepository
-from src.broker.domain import base_event, handlers, producer
-from src.features.sessions.domain.schemas import UpdateEmbeddingSessionPayload
+from src.persistence import SessionRepository
+from src.broker import AsyncHandler, CommunicationProducer, BaseEvent
+from ...domain import UpdateEmbeddingSessionPayload
 
-class UpdateEmbeddingSession(handlers.Handler):
+class UpdateEmbeddingSession(AsyncHandler):
     def __init__(
         self,
         session_repository: SessionRepository,
-        producer: producer.CommunicationProducer
+        producer: CommunicationProducer
     ):
         self.__session_repository = session_repository
         self.__producer = producer
 
     async def handle(self, event):
-        parsed_event = base_event.BaseEvent(**event)
+        parsed_event = BaseEvent(**event)
         payload = UpdateEmbeddingSessionPayload(**parsed_event.payload)
 
         key = f"{parsed_event.agent_id}_embeddings_tracker"

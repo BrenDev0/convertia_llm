@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 from typing import List
-from uuid import UUID
-from src.persistence.domain.entities import DocumentChunk
+from src.persistence import DocumentChunk
 
 class EmbeddingResult(BaseModel):
     chunks: List[DocumentChunk]

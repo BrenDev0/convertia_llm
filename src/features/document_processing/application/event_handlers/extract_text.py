@@ -1,15 +1,16 @@
 import json
-from src.broker.domain import handlers, base_event, producer
-from src.features.document_processing.domain import pdf_processor, schemas
-from src.http.domain.async_http_client import AsyncHttpClient
-from src.features.document_processing.application.trackers.extract_text_tracker import ExtractTextTracker
-from src.persistence.domain.session_repository import SessionRepository
+from src.broker import AsyncHandler, BaseEvent, DocumentsProducer
+from src.http import AsyncHttpClient
+from src.persistence import SessionRepository
+from ...domain import PdfProcessor, ExtractTextPayload, ChunkTextData
+from ...application import ExtractTextTracker
 
-class ExtractTextHandler(handlers.AsyncHandler):
+
+class ExtractTextHandler(AsyncHandler):
     def __init__(
         self,
-        pdf_processor: pdf_processor.PdfProcessor,
-        producer: producer.DocumentsProducer,
+        pdf_processor: PdfProcessor,
+        producer: DocumentsProducer,
         async_http_client: AsyncHttpClient,
         session_repository: SessionRepository
     ):
@@ -19,8 +20,8 @@ class ExtractTextHandler(handlers.AsyncHandler):
         self.__session_repository = session_repository
 
     async def handle(self, event):
-        parsed_event = base_event.BaseEvent(**event)
-        payload = schemas.ExtractTextPayload(**parsed_event.payload)
+        parsed_event = BaseEvent(**event)
+        payload = ExtractTextPayload(**parsed_event.payload)
         progress_tracker = ExtractTextTracker(
             producer=self.__producer,
             total_steps=2,
@@ -83,7 +84,7 @@ class ExtractTextHandler(handlers.AsyncHandler):
             )
 
 
-        session_data = schemas.ChunkTextData(
+        session_data = ChunkTextData(
             knowledge_id=payload.knowledge_id,
             text=text
         )

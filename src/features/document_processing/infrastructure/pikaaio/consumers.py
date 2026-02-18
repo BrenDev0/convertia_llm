@@ -1,12 +1,12 @@
-from src.broker.infrastructure.pikaaio.async_consumer import PikaAioAsyncConsumer
-from src.features.document_processing.domain.consumers import ExtractTextQueueConfig, ChunkTextQueueConfig
-from src.features.document_processing.application.event_handlers import extract_text, chunk_text
+from src.broker import PikaAioAsyncConsumer
+from ...domain import ExtractTextQueueConfig, ChunkTextQueueConfig
+from ...application import ExtractTextHandler, ChunkTextHandler
 
 class PikaAioExtractTextConsumer(PikaAioAsyncConsumer):
     def __init__(
         self, 
         config: ExtractTextQueueConfig, 
-        handler: extract_text.ExtractTextHandler
+        handler: ExtractTextHandler
     ):
         super().__init__(config, handler)
 
@@ -15,6 +15,6 @@ class PikaAioChunkTextConsumer(PikaAioAsyncConsumer):
     def __init__(
         self, 
         config: ChunkTextQueueConfig, 
-        handler: chunk_text.ChunkTextHandler
+        handler: ChunkTextHandler
     ):
         super().__init__(config, handler)

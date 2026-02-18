@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional, Callable
+from typing import List, Optional
 from uuid import UUID
 from pydantic import BaseModel
-from src.persistence.domain.entities import DocumentChunk
+from ..domain import DocumentChunk
 
 class DeleteFilter(BaseModel):
     filename: Optional[str] = None
@@ -19,14 +19,7 @@ class VectorRepository(ABC):
         namespace: str,
     ):
         raise NotImplementedError
-    
-    @abstractmethod
-    def delete_embeddings(
-        self,
-        namespace: str,
-        **filters
-    ):
-        raise NotImplementedError
+
     
     @abstractmethod
     def create_namespace(
