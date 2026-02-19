@@ -6,7 +6,7 @@ from uuid import uuid4, UUID
 from src.persistence import DocumentChunk, SessionRepository
 from src.broker import BaseEvent, DocumentsProducer, AsyncHandler
 from ...domain import EmbeddingService, EmbedChunksData
-from ...application import (
+from ..trackers.embeddings_progress_tracker import (
     EmbeddingsProgressTracker,
 )
 

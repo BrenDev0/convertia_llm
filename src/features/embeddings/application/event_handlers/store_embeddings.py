@@ -2,7 +2,7 @@ import logging
 from src.broker import BaseEvent, AsyncHandler, DocumentsProducer
 from src.persistence import VectorRepository, SessionRepository
 from ...domain import StoreChunksData, UpdateEmbeddingStatusPayload
-from ...application import StoreEmbeddingsTracker
+from ..trackers.store_embeddings_tracker import StoreEmbeddingsTracker
 
 logger = logging.getLogger(__name__)
 

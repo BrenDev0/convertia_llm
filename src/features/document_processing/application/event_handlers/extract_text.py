@@ -3,7 +3,7 @@ from src.broker import AsyncHandler, BaseEvent, DocumentsProducer
 from src.http import AsyncHttpClient
 from src.persistence import SessionRepository
 from ...domain import PdfProcessor, ExtractTextPayload, ChunkTextData
-from ...application import ExtractTextTracker
+from ..trackers.extract_text_tracker import ExtractTextTracker
 
 
 class ExtractTextHandler(AsyncHandler):

@@ -3,7 +3,7 @@ from typing import List
 from openai import AsyncOpenAI
 from src.persistence import DocumentChunk
 from ...domain import EmbeddingService, EmbeddingResult
-from ...infrastructure import OpenAiEmbeddingResposne
+from .schemas import OpenAiEmbeddingResposne
 
 class OpenAIEmbeddingService(EmbeddingService):
     def __init__(self, model: str = "text-embedding-3-large"):
