@@ -3,7 +3,7 @@ import logging
 import os
 from dotenv import load_dotenv
 from src.di import Injector
-from src.broker.setup import setup_dependencies, setup_broker
+from src.knowledge_base.setup import setup_dependencies, setup_broker
 
 load_dotenv()
 

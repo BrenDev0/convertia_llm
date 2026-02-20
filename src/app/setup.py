@@ -2,7 +2,7 @@ import logging
 import asyncio
 from src.di import Injector
 from src.broker.domain import DocumentsProducer, CommunicationProducer
-from src.broker.infrastructure.pikaaio.async_producer import PikaAioCommunicationsProducer, PikaAioDocumentsProducer
+from src.broker.infrastructure.pikaaio import async_producer, connection
 from src.http.di import register_shared_dependencies as http_dependencies
 from src.persistence.di import register_shared_dependencies as persistance_dependencies
 from src.features.communication.di import (
@@ -26,8 +26,8 @@ from src.features.sessions.di import (
 logger = logging.getLogger(__name__)
 
 def setup_dependencies(injector: Injector):
-    injector.register(DocumentsProducer, PikaAioDocumentsProducer)
-    injector.register(CommunicationProducer, PikaAioCommunicationsProducer)
+    injector.register(DocumentsProducer, async_producer.PikaAioDocumentsProducer)
+    injector.register(CommunicationProducer, async_producer.PikaAioCommunicationsProducer)
     http_dependencies(injector=injector)
     persistance_dependencies(injector=injector)
     communication_dependencies(injector=injector)
@@ -40,7 +40,30 @@ def setup_dependencies(injector: Injector):
     sessions_shared_dependencies(injector=injector)
 
 
-async def setup_consumers(injector: Injector):
+async def __setup_exchanges():
+    try:
+        conn = await connection.get_async_connection()
+        channel = await conn.channel()
+
+
+        await channel.declare_exchange(
+            name="communication",
+            type="topic",
+            durable=True
+        )
+
+        logger.info("Exchanges setup")
+    
+    except Exception as e:
+        logger.error(str(e))
+        raise
+
+    finally:
+        await channel.close()
+
+async def setup_broker(injector: Injector):
+    await __setup_exchanges()
+
     async_consumers =  [
         injector.resolve(communications_consumers.BroadcastingConsumer)
     ]

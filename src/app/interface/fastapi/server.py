@@ -8,7 +8,7 @@ from src.features.document_processing.interface.fastapi import routes as documen
 from src.features.embeddings.interface.fastapi import routes as embeddings_routes
 from src.features.communication.interface.fastapi import ws as communications_ws
 from src.websocket import WebsocketConnectionsContainer
-from src.app.setup import setup_consumers, setup_dependencies
+from src.app.setup import setup_broker, setup_dependencies
 from src.app.interface.fastapi.middleware.hmac import verify_hmac
 
 
@@ -19,7 +19,7 @@ async def lifespan(app: FastAPI):
     api_injector = Injector()
 
     setup_dependencies(injector=api_injector)
-    await setup_consumers(injector=api_injector)
+    await setup_broker(injector=api_injector)
 
     app.state.injector = api_injector
     yield
