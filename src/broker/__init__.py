@@ -21,7 +21,8 @@ from .domain import (
     Consumer,
     AsyncConsumer,
     DocumentsProducer,
-    CommunicationProducer
+    CommunicationProducer,
+    ChatsProducer
 )
 
 from .infrastructure import (
@@ -42,6 +43,7 @@ __all__ = [
     "AsyncConsumer",
     "DocumentsProducer",
     "CommunicationProducer",
+    "ChatsProducer",
 
     #### Infrastructure ####
     "PikaAioAsyncProducer",

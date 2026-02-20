@@ -25,3 +25,6 @@ class DocumentsProducer(AsyncProducer):
 
 class CommunicationProducer(AsyncProducer):
     pass
+
+class ChatsProducer(AsyncProducer):
+    pass

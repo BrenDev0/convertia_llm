@@ -1,7 +1,13 @@
 from .base_event import BaseEvent
 from .consumer import Consumer, AsyncConsumer
 from .handlers import Handler, AsyncHandler
-from .producer import Producer, AsyncProducer, DocumentsProducer, CommunicationProducer
+from .producer import (
+    Producer, 
+    AsyncProducer, 
+    DocumentsProducer, 
+    CommunicationProducer,
+    ChatsProducer
+)
 from .queue_config import QueueConfig
 
 __all__ = [
@@ -14,5 +20,6 @@ __all__ = [
     "Consumer",
     "AsyncConsumer",
     "DocumentsProducer",
-    "CommunicationProducer"
+    "CommunicationProducer",
+    "ChatsProducer"
 ]
