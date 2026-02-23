@@ -1,9 +1,10 @@
 import os
 from src.broker import AsyncHandler, ChatsProducer
 from src.http import AsyncHttpClient, generate_hmac_headers
-from ...domain import ChatEvent
+from src.features.chats import ChatEvent
+from ...domain import CreateMessagePayload
 
-class CreateChatHandler(AsyncHandler):
+class CreateMessageHandler(AsyncHandler):
     def __init__(
         self,
         async_http_client: AsyncHttpClient,
@@ -14,6 +15,7 @@ class CreateChatHandler(AsyncHandler):
 
     async def handle(self, event):
         parsed_event = ChatEvent(**event)
+        payload = CreateMessagePayload(**parsed_event.payload)
 
         app_host = os.getenv("APP_HOST")
 
@@ -21,11 +23,12 @@ class CreateChatHandler(AsyncHandler):
 
         req_body = {
             "chat_id": parsed_event.chat_id,
-            "agent_id": parsed_event.agent_id
+            "type": payload.type,
+            "text": payload.text
         }
 
         await self.__async_http_client.request(
-            endpoint=f"{app_host}/chats/",
+            endpoint=f"{app_host}/messages/",
             method="POST",
             headers=headers,
             req_body=req_body
