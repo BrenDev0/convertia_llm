@@ -3,27 +3,59 @@ import asyncio
 from src.di import Injector
 from src.broker.infrastructure.pikaaio import connection, async_producer
 from src.broker.domain.producer import DocumentsProducer, CommunicationProducer
-from src.http.di import register_shared_dependencies as http_dependencies
-from src.persistence.di import register_shared_dependencies as persistance_dependencies
-from src.features.communication.di import (
-    register_broker_dependencies as communication_dependencies, 
-    register_shared_dependencies as commincation_shared_dependencies
+from src.http import AsyncHttpClient, HttpxAsyncHttpClient
+from src.persistence import (
+    SessionRepository,
+    VectorRepository,
 )
-from src.features.document_processing.domain import consumers as documents_consumers
-from src.features.document_processing.di import (
-    register_broker_dependencies as documents_dependencies,
-    register_shared_dependencies as documents_shared_dependencies
+from src.persistence.infrastructure import RedisSessionRepository, QdrantVectorRepository
+from src.features.document_processing.domain import (
+    TextChunker,
+    PdfProcessor,
+    ChunkTextQueueConfig,
+    ChunkTextConsumer,
+    ExtractTextQueueConfig,
+    ExtractTextConsumer
 )
-from src.features.embeddings.domain import consumers as embeddings_consumers
-from src.features.embeddings.di import (
-    register_broker_dependencies as embeddings_dependencies,
-    register_shared_dependencies as embeddings_shared_dependencies
+from src.features.document_processing.application import (
+    ExtractTextHandler,
+    ChunkTextHandler
 )
-from src.features.sessions.domain import consumers as sessions_consumers
-from src.features.sessions.di import (
-    register_broker_dependencies as session_dependencies,
-    register_shared_dependencies as session_shared_dependencies
+from src.features.document_processing.infrastructure import (
+    TiktokenTextChunker,
+    PypdfProcessor,
+    PikaAioChunkTextConsumer,
+    PikaAioExtractTextConsumer
 )
+
+from src.features.embeddings.domain import (
+    EmbeddingService,
+    EbedChunksQueueConfig,
+    StoreEmbeddingsQueueConfig,
+    UpdateEmbeddingsStatusQueueConfig,
+    EmbedChunksConsumer,
+    StoreEmbeddingsConsumer,
+    UpdateEmbeddingsStatusConsumer
+)
+from src.features.embeddings.application import (
+    EmbedChunksHandler,
+    StoreEmbeddingsHandler,
+    UpdateEmeddingStatusHandler
+)
+
+from src.features.embeddings.infrastructure import (
+    OpenAIEmbeddingService,
+    PikaAioEmbedChunksConsumer,
+    PikaAioStoreEmbeddingsConsumer,
+    PikaAioUpdateEmbeddingsStatusConsumer
+)
+
+from src.features.sessions.domain import (
+    UpdateEmbeddingsSessionConsumer,
+    UpdateEmbeddingsSessionQueueConfig
+)
+from src.features.sessions.application import UpdateEmbeddingSession
+from src.features.sessions.infrastructure import PikaAioUpdateEmbeddingsSessionConsumer
 
 logger = logging.getLogger(__name__)
 
@@ -31,20 +63,35 @@ def setup_dependencies(injector: Injector):
     injector.register(DocumentsProducer, async_producer.PikaAioDocumentsProducer)
     injector.register(CommunicationProducer, async_producer.PikaAioCommunicationsProducer)
     
-    persistance_dependencies(injector=injector)
-    http_dependencies(injector=injector)
+    injector.register(SessionRepository, RedisSessionRepository)
+    injector.register(VectorRepository, QdrantVectorRepository)
+    
+    injector.register(AsyncHttpClient, HttpxAsyncHttpClient)
 
-    communication_dependencies(injector=injector)
-    commincation_shared_dependencies(injector=injector)
+    injector.register(TextChunker, TiktokenTextChunker)
+    injector.register(PdfProcessor, PypdfProcessor)
+    injector.register(ExtractTextHandler)
+    injector.register(ChunkTextHandler)
+    injector.register(ChunkTextQueueConfig)
+    injector.register(ChunkTextConsumer, PikaAioChunkTextConsumer)
+    injector.register(ExtractTextQueueConfig)
+    injector.register(ExtractTextConsumer, PikaAioExtractTextConsumer)
 
-    documents_dependencies(injector=injector)
-    documents_shared_dependencies(injector=injector)
 
-    embeddings_dependencies(injector=injector)
-    embeddings_shared_dependencies(injector=injector)
+    injector.register(EmbeddingService, OpenAIEmbeddingService)
+    injector.register(EmbedChunksHandler)
+    injector.register(StoreEmbeddingsHandler)
+    injector.register(UpdateEmeddingStatusHandler)
+    injector.register(EbedChunksQueueConfig)
+    injector.register(EmbedChunksConsumer, PikaAioEmbedChunksConsumer)
+    injector.register(StoreEmbeddingsQueueConfig)
+    injector.register(StoreEmbeddingsConsumer, PikaAioStoreEmbeddingsConsumer)
+    injector.register(UpdateEmbeddingsStatusQueueConfig)
+    injector.register(UpdateEmbeddingsStatusConsumer, PikaAioUpdateEmbeddingsStatusConsumer)
 
-    session_dependencies(injector=injector)
-    session_shared_dependencies(injector=injector)
+    injector.register(UpdateEmbeddingSession)
+    injector.register(UpdateEmbeddingsSessionQueueConfig)
+    injector.register(UpdateEmbeddingsSessionConsumer, PikaAioUpdateEmbeddingsSessionConsumer)
 
 
 
@@ -78,12 +125,12 @@ async def setup_broker(injector: Injector):
     await __setup_exchanges()
 
     async_consumers = [
-        injector.resolve(documents_consumers.ExtractTextConsumer),
-        injector.resolve(documents_consumers.ChunkTextConsumer),
-        injector.resolve(embeddings_consumers.StoreEmbeddingsConsumer),
-        injector.resolve(embeddings_consumers.UpdateEmbeddingsStatusConsumer),
-        injector.resolve(embeddings_consumers.EmbedChunksConsumer),
-        injector.resolve(sessions_consumers.UpdateEmbeddingsSessionConsumer)
+        injector.resolve(ExtractTextConsumer),
+        injector.resolve(ChunkTextConsumer),
+        injector.resolve(StoreEmbeddingsConsumer),
+        injector.resolve(UpdateEmbeddingsStatusConsumer),
+        injector.resolve(EmbedChunksConsumer),
+        injector.resolve(UpdateEmbeddingsSessionConsumer)
     ]
 
     for consumer in async_consumers:

@@ -1,5 +1,5 @@
-from .pikaaio.consumers import PikaAioUpdateEmbeddingsStatusConsumer
+from .pikaaio.consumers import PikaAioUpdateEmbeddingsSessionConsumer
 
 __all__ = [
-    "PikaAioUpdateEmbeddingsStatusConsumer"
+    "PikaAioUpdateEmbeddingsSessionConsumer"
 ]

@@ -3,41 +3,29 @@ import asyncio
 from src.di import Injector
 from src.broker.domain import DocumentsProducer, CommunicationProducer
 from src.broker.infrastructure.pikaaio import async_producer, connection
-from src.http.di import register_shared_dependencies as http_dependencies
-from src.persistence.di import register_shared_dependencies as persistance_dependencies
-from src.features.communication.di import (
-    register_api_dependencies as communication_dependencies,
-    register_shared_dependencies as communications_shared_dependencies
-)
-from src.features.communication.domain import consumers as communications_consumers
-from src.features.document_processing.di import (
-    register_api_dependencies as documents_dependencies,
-    register_shared_dependencies as documents_shared_dependencies
-)
-from src.features.embeddings.di import (
-    register_api_dependencies as embeddings_dependencies,
-    register_shared_dependencies as embeddings_shared_dependencies
-)
-from src.features.sessions.di import (
-    register_api_dependencies as sessions_dependencies,
-    register_shared_dependencies as sessions_shared_dependencies
-)
+from src.http.domain import AsyncHttpClient
+from src.http.infrastructure import HttpxAsyncHttpClient
+from src.persistence.domain import SessionRepository, VectorRepository
+from src.persistence.infrastructure import RedisSessionRepository, QdrantVectorRepository
+from src.features.communication.domain import BroadcastingQueueConfig, BroadcastingConsumer
+from src.features.communication.application import BroadcastHandler
+from src.features.communication.infrastructure import PikaAioBroadcastingConsumer
 
 logger = logging.getLogger(__name__)
 
 def setup_dependencies(injector: Injector):
     injector.register(DocumentsProducer, async_producer.PikaAioDocumentsProducer)
     injector.register(CommunicationProducer, async_producer.PikaAioCommunicationsProducer)
-    http_dependencies(injector=injector)
-    persistance_dependencies(injector=injector)
-    communication_dependencies(injector=injector)
-    communications_shared_dependencies(injector=injector)
-    documents_dependencies(injector=injector)
-    documents_shared_dependencies(injector=injector)
-    embeddings_dependencies(injector=injector)
-    embeddings_shared_dependencies(injector=injector)
-    sessions_dependencies(injector=injector)
-    sessions_shared_dependencies(injector=injector)
+    
+    
+    injector.register(AsyncHttpClient, HttpxAsyncHttpClient)
+
+    injector.register(SessionRepository, RedisSessionRepository)
+    injector.register(VectorRepository, QdrantVectorRepository)
+
+    injector.register(BroadcastHandler)
+    injector.register(BroadcastingQueueConfig)
+    injector.register(BroadcastingConsumer, PikaAioBroadcastingConsumer)
 
 
 async def __setup_exchanges():
@@ -65,7 +53,7 @@ async def setup_broker(injector: Injector):
     await __setup_exchanges()
 
     async_consumers =  [
-        injector.resolve(communications_consumers.BroadcastingConsumer)
+        injector.resolve(BroadcastingConsumer)
     ]
 
     for consumer in async_consumers:
