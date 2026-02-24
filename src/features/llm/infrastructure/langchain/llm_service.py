@@ -19,7 +19,7 @@ class LangchainLlmService(LlmService):
         )
 
     
-    async def invoke(
+    async def interact(
         self,
         max_tokens: int,
         temperature: float,

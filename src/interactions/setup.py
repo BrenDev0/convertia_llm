@@ -7,7 +7,7 @@ from src.features.chats.domain import CreateChatConsumer, CreateChatQueConfig
 from src.features.chats.application import CreateChatHandler
 from src.features.chats.infrastructure import PikaaioCreateChatConsumer
 from src.features.messages.domain import ChatHistoryConsumer, ChatHistoryQueueConfig, CreateMessageConsumer, CreateMessageQueueConfig
-from src.features.messages.application import ChatHistoryHandler, CreateMessageHandler
+from src.features.messages.application import ChatHistoryHandler, CreateMessageHandler, GetRAGChatHistory
 from src.features.messages.infrastructure import PikaaioChatHistoryConsumer, PikaaioCreateMessageConsumer
 from src.features.llm.domain import InvokeClientAgentconsumer, InvokeClientAgentQueueConfig, LlmService
 from src.features.llm.application import InvokeClientAgentHandler
@@ -19,6 +19,9 @@ from src.persistence import (
 from src.persistence.infrastructure import RedisSessionRepository, QdrantVectorRepository
 from src.http import AsyncHttpClient, HttpxAsyncHttpClient
 
+from src.features.embeddings.domain import EmbeddingService
+from src.features.embeddings.infrastructure import OpenAIEmbeddingService
+from src.features.embeddings.application import GetRAGContext
 logger = logging.getLogger(__name__)
 
 def setup_dependencies(injector: Injector):
@@ -38,8 +41,12 @@ def setup_dependencies(injector: Injector):
     injector.register(CreateMessageQueueConfig)
     injector.register(ChatHistoryHandler)
     injector.register(CreateMessageHandler)
+    injector.register(GetRAGChatHistory)
     injector.register(ChatHistoryConsumer, PikaaioChatHistoryConsumer)
     injector.register(CreateMessageConsumer, PikaaioCreateMessageConsumer)
+
+    injector.register(EmbeddingService, OpenAIEmbeddingService)
+    injector.register(GetRAGContext)
 
     injector.register(InvokeClientAgentQueueConfig)
     injector.register(InvokeClientAgentHandler)

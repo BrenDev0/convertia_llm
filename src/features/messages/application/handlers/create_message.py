@@ -1,7 +1,6 @@
 import os
-from src.broker import AsyncHandler, ChatsProducer
+from src.broker import AsyncHandler, ChatsProducer, ChatEvent
 from src.http import AsyncHttpClient, generate_hmac_headers
-from src.features.chats import ChatEvent
 from ...domain import CreateMessagePayload
 
 class CreateMessageHandler(AsyncHandler):

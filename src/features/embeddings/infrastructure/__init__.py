@@ -3,8 +3,7 @@ from .openai.schemas import OpenAiEmbeddingResposne
 from .pikaaio.consumers import (
     PikaAioEmbedChunksConsumer,
     PikaAioStoreEmbeddingsConsumer,
-    PikaAioUpdateEmbeddingsStatusConsumer, 
-    PikaAioRagContextConsumer
+    PikaAioUpdateEmbeddingsStatusConsumer
 )
 
 __all__ = [
@@ -12,6 +11,5 @@ __all__ = [
     "OpenAIEmbeddingService",
     "PikaAioEmbedChunksConsumer",
     "PikaAioUpdateEmbeddingsStatusConsumer",
-    "PikaAioStoreEmbeddingsConsumer",
-    "PikaAioRagContextConsumer"
+    "PikaAioStoreEmbeddingsConsumer"
 ]

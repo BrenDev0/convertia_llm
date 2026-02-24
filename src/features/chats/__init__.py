@@ -8,10 +8,3 @@ interface: access point
 __version__ = "1.0.0"
 __author__ = "Xplorers"
 __description__ = "chats package for app"
-
-
-from .domain import ChatEvent
-
-__all__ = [
-    "ChatEvent"
-]
