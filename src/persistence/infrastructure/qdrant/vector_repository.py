@@ -2,6 +2,7 @@ import os
 from uuid import UUID
 import qdrant_client
 from qdrant_client import models
+from typing import List
 from ...domain import VectorRepository
 
 class QdrantVectorRepository(VectorRepository):
@@ -122,6 +123,30 @@ class QdrantVectorRepository(VectorRepository):
                 )
             )
         )
+
+    def query_context(
+        self,
+        query_vector: List[float],
+        agent_id: UUID
+    ):
+        
+        result = self.__client.query_points(
+            collection_name="convertia",
+            query=query_vector,
+            filter=models.Filter(
+                must=[
+                    models.FieldCondition(
+                        key="agent_id",
+                        match=models.MatchValue(value=str(agent_id))
+                    )
+                ]
+            )
+        )
+
+        return [
+            point.payload.get("text")
+            for point in result.points
+        ]
 
     
     

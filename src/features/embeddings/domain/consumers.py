@@ -16,8 +16,7 @@ class UpdateEmbeddingsStatusQueueConfig(QueueConfig):
     exchange: str ="documents"
     queue_name: str ="documents.update_embedding_status.q"
     routing_key: str ="documents.status.update"
-
-
+    
 class EmbedChunksConsumer(AsyncConsumer):
     pass
 
@@ -26,4 +25,3 @@ class StoreEmbeddingsConsumer(AsyncConsumer):
 
 class UpdateEmbeddingsStatusConsumer(AsyncConsumer):
     pass
-

@@ -32,4 +32,3 @@ class DeleteEmbeddingsPayload(BaseModel):
 class DeleteEmbeddingsRequest(BaseModel):
     key: str
     value: UUID
-

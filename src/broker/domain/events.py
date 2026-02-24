@@ -8,3 +8,7 @@ class BaseEvent(BaseModel):
     user_id: Optional[UUID] = None
     agent_id: Optional[UUID] = None
     payload: Optional[Dict[str, Any]] = None
+
+class ChatEvent(BaseEvent):
+    chat_id: UUID
+    payload: Dict[str, Any]

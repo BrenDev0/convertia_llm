@@ -36,3 +36,11 @@ class VectorRepository(ABC):
     @abstractmethod
     def delete_embeddings(self, key: str, value: UUID, namespace: str,):
         raise NotImplementedError
+    
+    @abstractmethod
+    def query_context(
+        self,
+        query_vector: List[float],
+        agent_id: UUID
+    ):
+        raise NotImplementedError

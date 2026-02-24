@@ -1,8 +1,8 @@
 import json
 from typing import List, Dict, Any
-from src.broker import AsyncHandler, ChatsProducer
+from src.broker import AsyncHandler, ChatsProducer, ChatEvent
 from src.persistence import SessionRepository
-from src.features.chats import ChatEvent
+
 from ...domain import CreateMessagePayload
 
 class ChatHistoryHandler(AsyncHandler):
@@ -32,10 +32,11 @@ class ChatHistoryHandler(AsyncHandler):
                 expire_seconds=1800
             )
 
-            await self.__chats_producer.publish(
-                routing_key="chats.chat.create",
-                event=parsed_event
-            )
+            if payload.transctipts:
+                await self.__chats_producer.publish(
+                    routing_key="chats.chat.create",
+                    event=parsed_event
+                )
 
             return 
         
@@ -53,10 +54,11 @@ class ChatHistoryHandler(AsyncHandler):
             expire_seconds=1800
         )
 
-        self.__chats_producer.publish(
-            routing_key="chats.message.create",
-            event=parsed_event
-        )
+        if payload.transctipts:
+            self.__chats_producer.publish(
+                routing_key="chats.message.create",
+                event=parsed_event
+            )
         
 
 

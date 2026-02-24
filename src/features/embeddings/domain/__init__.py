@@ -4,7 +4,7 @@ from .schemas import (
     UpdateEmbeddingStatusPayload,
     StoreChunksData,
     DeleteEmbeddingsPayload,
-    DeleteEmbeddingsRequest
+    DeleteEmbeddingsRequest, 
 )
 from .consumers import (
     EbedChunksQueueConfig,

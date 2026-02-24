@@ -1,7 +1,6 @@
 import os
-from src.broker import AsyncHandler, ChatsProducer
+from src.broker import AsyncHandler, ChatsProducer, ChatEvent
 from src.http import AsyncHttpClient, generate_hmac_headers
-from ...domain import ChatEvent
 
 class CreateChatHandler(AsyncHandler):
     def __init__(

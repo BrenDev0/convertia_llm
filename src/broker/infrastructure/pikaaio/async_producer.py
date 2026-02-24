@@ -65,3 +65,8 @@ class PikaAioDocumentsProducer(PikaAioAsyncProducer):
 class PikaAioCommunicationsProducer(PikaAioAsyncProducer):
     def __init__(self):
         super().__init__(exchange="communication")
+
+
+class PikaAioChatsProducer(PikaAioAsyncProducer):
+    def __init__(self):
+        super().__init__(exchange="chats")
