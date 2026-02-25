@@ -13,7 +13,8 @@ __description__ = "persistence package for app"
 from .domain import (
     DocumentChunk,
     VectorRepository,
-    SessionRepository
+    SessionRepository,
+    NotFoundException
 )
 
 
@@ -21,5 +22,6 @@ __all__ = [
     #### Domain ####
     "DocumentChunk",
     "VectorRepository",
-    "SessionRepository"
+    "SessionRepository",
+    "NotFoundException"
 ]

@@ -10,5 +10,4 @@ class BaseEvent(BaseModel):
     payload: Optional[Dict[str, Any]] = None
 
 class ChatEvent(BaseEvent):
-    chat_id: UUID
-    payload: Dict[str, Any]
+    pass

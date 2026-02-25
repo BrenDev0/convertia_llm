@@ -1,11 +1,17 @@
 import logging
-from uuid import UUID
+import os
+from di import Injector
+from uuid import UUID, uuid4
 from pydantic import ValidationError
-from fastapi import APIRouter, WebSocket, status, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket, status, WebSocketDisconnect, Depends
 from src.websocket import WebsocketConnectionsContainer, WebsocketMessage, WebsocketException
 from src.security import verify_hmac_ws
-
-
+from src.http import generate_hmac_headers, AsyncHttpClient
+from src.persistence import NotFoundException, SessionRepository
+from src.broker import ChatEvent, ChatsProducer
+from src.features.messages.domain import CreateMessagePayload
+from src.features.llm.domain import InvokeAgentPayload
+from ...domain import IncommingMessageData
 
 logger = logging.getLogger(__name__)
 
@@ -13,10 +19,65 @@ router = APIRouter(
     tags=["Websocket"]
 )
 
+def get_injector(
+    websocket: WebSocket
+):
+    """
+    Use with Depends() to get di injector
+    """
+
+    return websocket.app.state.injector
+
+async def get_agent_config(
+    agent_id: UUID,
+    injector: Injector
+    ):
+    """
+    check if agent config is in redis if not get it from 
+    main server and store in redis
+
+    args: 
+    agent id(from request)
+    injector: Injector class from src.di passed from app state. 
+    This must be the injector used in the deployment
+
+    returns:
+    agent_id: UUID
+    system_prompt: str
+    temperature: float
+    transcripts: bool
+    """
+
+    session_repository: SessionRepository = injector.resolve(SessionRepository)
+    key = f"{agent_id}_settings"
+    session = session_repository.get_session(key)
+
+    if not session:
+        http_client = injector.resolve(AsyncHttpClient)
+        try:
+            app_host = os.getenv("APP_HOST")
+
+            headers = generate_hmac_headers()
+            
+            return await http_client.request(
+                endpoint=f"{app_host}/agent-settings/{agent_id}",
+                method="GET",
+                headers=headers
+            )
+        
+        except NotFoundException:
+            raise WebsocketException(f"No agent settings found for agent with id: {agent_id}")
+        
+        except Exception:
+            raise
+
+    return session
+
 @router.websocket("/communications/{connection_id}")
 async def async_ws_connect(
     websocket: WebSocket,
-    connection_id: UUID
+    connection_id: UUID,
+    injector: Injector = Depends(get_injector)
 ):
     params = websocket.query_params
 
@@ -42,7 +103,46 @@ async def async_ws_connect(
 
             match(parsed_message.type.upper()):
                 case "MESSAGE":
-                    pass
+                    data = IncommingMessageData(**parsed_message.data)
+                    agent_config = get_agent_config(
+                        agent_id=data.agent_id,
+                        injector=injector
+                    )
+
+                    create_message_payload = CreateMessagePayload(
+                        type="human",
+                        text=data.input,
+                        transctipts=agent_config["transcripts"]
+                    )
+
+                    invoke_agent_payload = InvokeAgentPayload(
+                        input=data.input,
+                        prompt=agent_config["prompt"],
+                        max_tokens=agent_config["max_tokens"],
+                        temperature=agent_config["temperature"],
+                        transcripts=agent_config["transcripts"]
+                    )
+
+                    chat_event = ChatEvent(
+                        event_id=uuid4(),
+                        connection_id=connection_id,
+                        agent_id=data.agent_id
+                    )
+
+                    chat_event.payload = create_message_payload.model_dump()
+
+                    chat_producer: ChatsProducer = injector.resolve(ChatsProducer)
+                    chat_producer.publish(
+                        routing_key="chats.history.update",
+                        event=chat_event
+                    )
+
+
+                    chat_event.payload = invoke_agent_payload.model_dump()
+                    chat_producer.publish(
+                        routing_key="chats.llm.client.invoke",
+                        event=chat_event
+                    )
 
                 case _:
                     raise WebsocketException(f"Invalid message type: {parsed_message.type}")
