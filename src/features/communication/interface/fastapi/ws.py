@@ -1,6 +1,6 @@
 import logging
 import os
-from di import Injector
+from src.di import Injector
 from uuid import UUID, uuid4
 from pydantic import ValidationError
 from fastapi import APIRouter, WebSocket, status, WebSocketDisconnect, Depends

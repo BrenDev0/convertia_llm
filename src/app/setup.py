@@ -1,7 +1,7 @@
 import logging
 import asyncio
 from src.di import Injector
-from src.broker.domain import DocumentsProducer, CommunicationProducer
+from src.broker.domain import DocumentsProducer, CommunicationProducer, ChatsProducer
 from src.broker.infrastructure.pikaaio import async_producer, connection
 from src.http.domain import AsyncHttpClient
 from src.http.infrastructure import HttpxAsyncHttpClient
@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 def setup_dependencies(injector: Injector):
     injector.register(DocumentsProducer, async_producer.PikaAioDocumentsProducer)
     injector.register(CommunicationProducer, async_producer.PikaAioCommunicationsProducer)
+    injector.register(ChatsProducer, async_producer.PikaAioChatsProducer)
     
     
     injector.register(AsyncHttpClient, HttpxAsyncHttpClient)
