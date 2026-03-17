@@ -19,8 +19,8 @@ class CreateChatHandler(AsyncHandler):
         headers = generate_hmac_headers()
 
         req_body = {
-            "chat_id": parsed_event.chat_id,
-            "agent_id": parsed_event.agent_id
+            "chat_id": str(parsed_event.connection_id),
+            "agent_id": str(parsed_event.agent_id)
         }
 
         await self.__async_http_client.request(

@@ -21,7 +21,7 @@ class CreateMessageHandler(AsyncHandler):
         headers = generate_hmac_headers()
 
         req_body = {
-            "chat_id": parsed_event.chat_id,
+            "chat_id": str(parsed_event.connection_id),
             "type": payload.type,
             "text": payload.text
         }

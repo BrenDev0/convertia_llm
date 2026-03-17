@@ -30,37 +30,37 @@ class InvokeClientAgentHandler(AsyncHandler):
         )
 
         prompt_with_chat_history = self.__rag_chat_history.execute(
-            chat_id=parsed_event.chat_id,
+            chat_id=parsed_event.connection_id,
             prompt=prompt_with_context
         )
 
         chunks = []
-        async for chunk in self.__llm_service.interact(prompt=prompt_with_chat_history):
+        async for chunk in self.__llm_service.interact(prompt=prompt_with_chat_history, temperature=payload.temperature):
             chunks.append(chunk)
             event_copy = parsed_event.model_copy()
             chunk_payload = {
                 "type": "CHUNK",
-                "data": str(chunk),
-                "transcripts": payload.transcripts
+                "data": str(chunk)
             }
 
             event_copy.payload = chunk_payload
 
             ## Send to front end
             await self.__communications_producer.publish(
-                routing_key="",
+                routing_key="communication.websocket.broadcast",
                 event= event_copy
             )
 
         ai_response_payload = {
             "type": "ai",
-            "text": " ".join(chunks)
+            "text": " ".join(chunks),
+            "transcripts": payload.transcripts
         }
 
         parsed_event.payload = ai_response_payload
         
         ## update chat history and save message in db
-        self.__chats_producer.publish(
+        await self.__chats_producer.publish(
             routing_key="chats.history.update",
             event=parsed_event
         )

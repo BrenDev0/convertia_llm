@@ -59,11 +59,13 @@ async def get_agent_config(
 
             headers = generate_hmac_headers()
             
-            return await http_client.request(
+            response = await http_client.request(
                 endpoint=f"{app_host}/agent-settings/{agent_id}",
                 method="GET",
                 headers=headers
             )
+
+            return response.json()
         
         except NotFoundException:
             raise WebsocketException(f"No agent settings found for agent with id: {agent_id}")
@@ -104,7 +106,7 @@ async def async_ws_connect(
             match(parsed_message.type.upper()):
                 case "MESSAGE":
                     data = IncommingMessageData(**parsed_message.data)
-                    agent_config = get_agent_config(
+                    agent_config = await get_agent_config(
                         agent_id=data.agent_id,
                         injector=injector
                     )
@@ -117,8 +119,7 @@ async def async_ws_connect(
 
                     invoke_agent_payload = InvokeAgentPayload(
                         input=data.input,
-                        prompt=agent_config["prompt"],
-                        max_tokens=agent_config["max_tokens"],
+                        prompt=agent_config["system_prompt"],
                         temperature=agent_config["temperature"],
                         transcripts=agent_config["transcripts"]
                     )
@@ -132,14 +133,14 @@ async def async_ws_connect(
                     chat_event.payload = create_message_payload.model_dump()
 
                     chat_producer: ChatsProducer = injector.resolve(ChatsProducer)
-                    chat_producer.publish(
+                    await chat_producer.publish(
                         routing_key="chats.history.update",
                         event=chat_event
                     )
 
 
                     chat_event.payload = invoke_agent_payload.model_dump()
-                    chat_producer.publish(
+                    await chat_producer.publish(
                         routing_key="chats.llm.client.invoke",
                         event=chat_event
                     )

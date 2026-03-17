@@ -18,7 +18,7 @@ class ChatHistoryHandler(AsyncHandler):
         parsed_event = ChatEvent(**event)
         payload = CreateMessagePayload(**parsed_event.payload)
 
-        key = f"{parsed_event.chat_id}_chat_history"
+        key = f"{parsed_event.connection_id}_chat_history"
         session: List[Dict[str, Any]] = self.__session_repository.get_session(key)
 
         if not session:

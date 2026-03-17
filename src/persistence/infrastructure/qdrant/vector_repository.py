@@ -113,7 +113,7 @@ class QdrantVectorRepository(VectorRepository):
         self.__client.delete(
             collection_name=namespace,
             points_selector=models.FilterSelector(
-                filter=models.Filter(
+                query_filter=models.Filter(
                     must=[
                         models.FieldCondition(
                             key=key,
@@ -133,7 +133,7 @@ class QdrantVectorRepository(VectorRepository):
         result = self.__client.query_points(
             collection_name="convertia",
             query=query_vector,
-            filter=models.Filter(
+            query_filter=models.Filter(
                 must=[
                     models.FieldCondition(
                         key="agent_id",
@@ -144,7 +144,7 @@ class QdrantVectorRepository(VectorRepository):
         )
 
         return [
-            point.payload.get("text")
+            point.payload.get("content")
             for point in result.points
         ]
 

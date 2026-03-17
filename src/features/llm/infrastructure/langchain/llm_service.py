@@ -8,25 +8,21 @@ class LangchainLlmService(LlmService):
     
     def _get_agent(
         self,
-        max_tokens: int,
         temperature: float,
     ):
         return ChatOpenAI(
             model=self.__model,
             temperature=temperature,
-            max_tokens=max_tokens,
             streaming=True
         )
 
     
     async def interact(
         self,
-        max_tokens: int,
         temperature: float,
         prompt: str
     ):
         llm = self._get_agent(
-            max_tokens=max_tokens,
             temperature=temperature
         )
 
