@@ -54,9 +54,9 @@ class ChatHistoryHandler(AsyncHandler):
             expire_seconds=1800
         )
 
-        if payload.transctipts:
-            self.__chats_producer.publish(
-                routing_key="chats.message.create",
+        if payload.transcripts:
+            await self.__chats_producer.publish(
+                routing_key="chats.message.create", 
                 event=parsed_event
             )
         
