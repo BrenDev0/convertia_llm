@@ -114,7 +114,7 @@ async def async_ws_connect(
                     create_message_payload = CreateMessagePayload(
                         type="human",
                         text=data.input,
-                        transctipts=agent_config["transcripts"]
+                        transcripts=agent_config["transcripts"]
                     )
 
                     invoke_agent_payload = InvokeAgentPayload(
