@@ -32,8 +32,3 @@ class CreateMessageHandler(AsyncHandler):
             headers=headers,
             req_body=req_body
         )
-
-        await self.__chats_producer.publish(
-            routing_key="",
-            event=parsed_event
-        )
